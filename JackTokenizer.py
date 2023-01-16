@@ -5,8 +5,8 @@ import Patterns as pattern
 class JackTokenizer:
     KEYWORD = 0
     SYMBOL = 1
-    INT_CONST = 2
-    STRING_CONST = 3
+    DIGIT = 2
+    STRING = 3
     IDENTIFIER = 4
 
     def __init__(self, input_path):
@@ -38,8 +38,8 @@ class JackTokenizer:
         if self.hasMoreTokens():
             self._update_properties_if(pattern.KEY_WORD, JackTokenizer.KEYWORD)
             self._update_properties_if(pattern.SYMBOL, JackTokenizer.SYMBOL)
-            self._update_properties_if(pattern.DIGIT, JackTokenizer.INT_CONST)
-            self._update_properties_if(pattern.STRING, JackTokenizer.STRING_CONST)
+            self._update_properties_if(pattern.DIGIT, JackTokenizer.DIGIT)
+            self._update_properties_if(pattern.STRING, JackTokenizer.STRING)
             self._update_properties_if(pattern.IDENTIFIER, JackTokenizer.IDENTIFIER)
 
     def _update_properties(self, pattern, token_type, current_match):
