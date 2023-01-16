@@ -54,9 +54,9 @@ class CompilationEngine:
         self._write_keyword()
 
         self._tokenizer.advance()
-        if self._tokenizer.tokenType() == self._tokenizer.KEYWORD:
+        if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword()
-        elif self._tokenizer.tokenType() == self._tokenizer.IDENTIFIER:
+        elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier()
 
         self._tokenizer.advance()
@@ -92,10 +92,10 @@ class CompilationEngine:
     def compileParameterList(self):
         self._output.write("  " * self._indentation + "<parameterList>\n")
         self._indentation += 1
-        while self._tokenizer.tokenType() != self._tokenizer.SYMBOL:
-            if self._tokenizer.tokenType() == self._tokenizer.KEYWORD:
+        while self._tokenizer.get_token_type() != self._tokenizer.SYMBOL:
+            if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
                 self._write_keyword()
-            elif self._tokenizer.tokenType() == self._tokenizer.IDENTIFIER:
+            elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
                 self._write_identifier()
             self._tokenizer.advance()
             self._write_identifier()
@@ -121,7 +121,7 @@ class CompilationEngine:
     def compileStatements(self):
         self._output.write("  " * self._indentation + "<statements>\n")
         self._indentation += 1
-        while self._tokenizer.tokenType() == self._tokenizer.KEYWORD:
+        while self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             if self._tokenizer.get_keyword() == "let":
                 self.compileLet()
             elif self._tokenizer.get_keyword() == "if":
@@ -221,7 +221,7 @@ class CompilationEngine:
         self._write_keyword()
 
         self._tokenizer.advance()
-        if self._tokenizer.tokenType() != self._tokenizer.SYMBOL and \
+        if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ";":
             self.compileExpression()
 
@@ -253,7 +253,7 @@ class CompilationEngine:
         self._write_symbol()
 
         self._tokenizer.advance()
-        if self._tokenizer.tokenType() == self._tokenizer.KEYWORD and \
+        if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD and \
                 self._tokenizer.get_keyword() == "else":
             self._write_keyword()
 
@@ -279,7 +279,7 @@ class CompilationEngine:
         self._indentation += 1
 
         self.compileTerm()
-        while self._tokenizer.tokenType() == self._tokenizer.SYMBOL and \
+        while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() in OP_LIST:
             self._write_symbol()
             self._tokenizer.advance()
@@ -293,13 +293,13 @@ class CompilationEngine:
         sanity_check = True
         self._output.write("  " * self._indentation + "<term>\n")
         self._indentation += 1
-        if self._tokenizer.tokenType() == self._tokenizer.INT_CONST:
+        if self._tokenizer.get_token_type() == self._tokenizer.INT_CONST:
             self._write_int_const()
-        elif self._tokenizer.tokenType() == self._tokenizer.STRING_CONST:
+        elif self._tokenizer.get_token_type() == self._tokenizer.STRING_CONST:
             self._write_str_const()
-        elif self._tokenizer.tokenType() == self._tokenizer.KEYWORD:
+        elif self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword()
-        elif self._tokenizer.tokenType() == self._tokenizer.IDENTIFIER:
+        elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier()
 
 
@@ -350,17 +350,17 @@ class CompilationEngine:
         self._output.write("  " * self._indentation + "<expressionList>\n")
         self._indentation += 1
 
-        if self._tokenizer.tokenType() != self._tokenizer.SYMBOL and \
+        if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ")":
             self.compileExpression()
-            while self._tokenizer.tokenType() == self._tokenizer.SYMBOL and \
+            while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
                 self._write_symbol()
                 self._tokenizer.advance()
                 self.compileExpression()
         if self._tokenizer.get_symbol() =="(":
             self.compileExpression()
-            while self._tokenizer.tokenType() == self._tokenizer.SYMBOL and \
+            while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
                 self._write_symbol()
                 self._tokenizer.advance()
@@ -370,9 +370,9 @@ class CompilationEngine:
         self._output.write("  " * self._indentation + "</expressionList>\n")
 
     def _compile_type_and_varName(self):
-        if self._tokenizer.tokenType() == self._tokenizer.KEYWORD:
+        if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword()
-        elif self._tokenizer.tokenType() == self._tokenizer.IDENTIFIER:
+        elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier()
         self._tokenizer.advance()
         self._write_identifier()
