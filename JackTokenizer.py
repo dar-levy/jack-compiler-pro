@@ -11,7 +11,7 @@ class JackTokenizer:
 
     def __init__(self, input_path):
         self.text = self._get_pure_data(input_path)
-        self._tokenType = None
+        self._token_type = None
         self._currentToken = None
 
     def _get_pure_data(self, input_path):
@@ -44,7 +44,7 @@ class JackTokenizer:
 
     def _update_properties(self, pattern, token_type, current_match):
         self.text = re.sub(pattern, "", self.text)
-        self._tokenType = token_type
+        self._token_type = token_type
         self._currentToken = current_match.group(1)
 
     def _update_properties_if(self, pattern, token_type):
@@ -52,7 +52,7 @@ class JackTokenizer:
         if current_match is not None:
             self._update_properties(pattern, token_type, current_match)
     def get_token_type(self):
-        return self._tokenType
+        return self._token_type
 
     def get_keyword(self):
         return self._currentToken
