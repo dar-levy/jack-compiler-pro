@@ -24,8 +24,6 @@ class CompilationEngine:
         current_father = self.xml_root
         if self._tokenizer.hasMoreTokens():
             self._tokenizer.advance()
-            # self._output.write("<class>\n")
-            # self._indentation += 1
 
             self._write_keyword(current_father)
 
@@ -41,10 +39,6 @@ class CompilationEngine:
 
             self._write_symbol(current_father)
 
-            # self._indentation -= 1
-            # self._output.write("</class>\n")
-            # self._output.close()
-
     def _handle_var_dec(self, current_father):
         while self._tokenizer.get_keyword() == "field" or \
                 self._tokenizer.get_keyword() == "static":
@@ -58,20 +52,13 @@ class CompilationEngine:
 
     def compile_class_var_dec(self, current_father):
         new_father = element_tree.SubElement(current_father, "classVarDec")
-        # self._output.write("  " * self._indentation + "<classVarDec>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
         self._compile_type_and_varName(new_father)
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</classVarDec>\n")
-
     def compileSubroutine(self, current_father):
         new_father = element_tree.SubElement(current_father, "subroutineDec")
-        # self._output.write("  " * self._indentation + "<subroutineDec>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
@@ -92,16 +79,13 @@ class CompilationEngine:
         self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        # compile subroutineBody:
+
         self.compile_subroutine_body(new_father)
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</subroutineDec>\n")
+
         self._tokenizer.advance()
 
     def compile_subroutine_body(self, current_father):
         new_father = element_tree.SubElement(current_father, "subroutineBody")
-        # self._output.write("  " * self._indentation + "<subroutineBody>\n")
-        # self._indentation += 1
         self._write_symbol(new_father)
 
         self._tokenizer.advance()
@@ -111,13 +95,9 @@ class CompilationEngine:
         self.compileStatements(new_father)
 
         self._write_symbol(new_father)
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</subroutineBody>\n")
 
     def compileParameterList(self, current_father):
         new_father = element_tree.SubElement(current_father, "parameterList")
-        # self._output.write("  " * self._indentation + "<parameterList>\n")
-        # self._indentation += 1
         while self._tokenizer.get_token_type() != self._tokenizer.SYMBOL:
             if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
                 self._write_keyword(new_father)
@@ -130,25 +110,14 @@ class CompilationEngine:
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</parameterList>\n")
-
     def compileVarDec(self, current_father):
         new_father = element_tree.SubElement(current_father, "varDec")
-        # self._output.write("  " * self._indentation + "<varDec>\n")
-        # self._indentation += 1
-
         self._write_keyword(new_father)
         self._tokenizer.advance()
         self._compile_type_and_varName(new_father)
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</varDec>\n")
-
     def compileStatements(self, current_father):
         new_father = element_tree.SubElement(current_father, "statements")
-        # self._output.write("  " * self._indentation + "<statements>\n")
-        # self._indentation += 1
         while self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             if self._tokenizer.get_keyword() == "let":
                 self.compileLet(new_father)
@@ -160,17 +129,13 @@ class CompilationEngine:
                 self.compileDo(new_father)
             elif self._tokenizer.get_keyword() == "return":
                 self.compileReturn(new_father)
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</statements>\n")
 
     def compileDo(self, current_father):
         new_father = element_tree.SubElement(current_father, "doStatement")
-        # self._output.write("  " * self._indentation + "<doStatement>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
-        #subroutineCall
+
         self._write_identifier(new_father)
         self._tokenizer.advance()
         if self._tokenizer.get_symbol() == ".":
@@ -189,14 +154,10 @@ class CompilationEngine:
         self._tokenizer.advance()
         self._write_symbol(new_father)
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</doStatement>\n")
         self._tokenizer.advance()
 
     def compileLet(self, current_father):
         new_father = element_tree.SubElement(current_father, "letStatement")
-        # self._output.write("  " * self._indentation + "<letStatement>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
@@ -216,14 +177,10 @@ class CompilationEngine:
         self.compileExpression(new_father)
         self._write_symbol(new_father)
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</letStatement>\n")
         self._tokenizer.advance()
 
     def compileWhile(self, current_father):
         new_father = element_tree.SubElement(current_father, "whileStatement")
-        # self._output.write("  " * self._indentation + "<whileStatement>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
@@ -241,15 +198,10 @@ class CompilationEngine:
         self.compileStatements(new_father)
 
         self._write_symbol(new_father)
-
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</whileStatement>\n")
         self._tokenizer.advance()
 
     def compileReturn(self, current_father):
         new_father = element_tree.SubElement(current_father, "returnStatement")
-        # self._output.write("  " * self._indentation + "<returnStatement>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
@@ -258,15 +210,10 @@ class CompilationEngine:
             self.compileExpression(new_father)
 
         self._write_symbol(new_father)
-
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</returnStatement>\n")
         self._tokenizer.advance()
 
     def compileIf(self, current_father):
         new_father = element_tree.SubElement(current_father, "ifStatement")
-        # self._output.write("  " * self._indentation + "<ifStatement>\n")
-        # self._indentation += 1
         self._write_keyword(new_father)
 
         self._tokenizer.advance()
@@ -299,15 +246,9 @@ class CompilationEngine:
             self._write_symbol(new_father)
             self._tokenizer.advance()
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</ifStatement>\n")
-
 
     def compileExpression(self, current_father):
         new_father = element_tree.SubElement(current_father, "expression")
-        # self._output.write("  " * self._indentation + "<expression>\n")
-        # self._indentation += 1
-
         self.compileTerm(new_father)
         while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() in OP_LIST:
@@ -315,15 +256,9 @@ class CompilationEngine:
             self._tokenizer.advance()
             self.compileTerm(new_father)
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</expression>\n")
-
     def compileTerm(self, current_father):
-        # debugging - not finished!!
         sanity_check = True
         new_father = element_tree.SubElement(current_father, "term")
-        # self._output.write("  " * self._indentation + "<term>\n")
-        # self._indentation += 1
         if self._tokenizer.get_token_type() == self._tokenizer.DIGIT:
             self._write_int_const(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.STRING:
@@ -342,7 +277,7 @@ class CompilationEngine:
                 self._tokenizer.advance()
                 self.compileExpression(new_father)
                 self._write_symbol(new_father)
-            elif self._tokenizer.get_symbol() == ".":  ## subroutine case
+            elif self._tokenizer.get_symbol() == ".":
                 sanity_check = True
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
@@ -374,14 +309,8 @@ class CompilationEngine:
         if sanity_check:
             self._tokenizer.advance()
 
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</term>\n")
-
     def compileExpressionList(self, current_father):
         new_father = element_tree.SubElement(current_father, "expressionList")
-        # self._output.write("  " * self._indentation + "<expressionList>\n")
-        # self._indentation += 1
-
         if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ")":
             self.compileExpression(new_father)
@@ -397,9 +326,6 @@ class CompilationEngine:
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
                 self.compileExpression(new_father)
-
-        # self._indentation -= 1
-        # self._output.write("  " * self._indentation + "</expressionList>\n")
 
     def _compile_type_and_varName(self, current_father):
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
@@ -419,13 +345,9 @@ class CompilationEngine:
 
     def _write_identifier(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'identifier', current_father)
-        # self._output.write("  " * self._indentation + "<identifier> " +
-        #                    self._tokenizer.get_identifier() + " </identifier>\n")
 
     def _write_keyword(self, current_father):
         self._create_element(self._tokenizer.get_keyword(), 'keyword', current_father)
-        # self._output.write("  " * self._indentation + "<keyword> " +
-        #                    self._tokenizer.get_keyword() + " </keyword>\n")
 
     def _write_symbol(self, current_father):
         string_to_write = self._tokenizer.get_symbol()
@@ -437,18 +359,12 @@ class CompilationEngine:
             string_to_write = "&amp;"
 
         self._create_element(string_to_write, 'symbol', current_father)
-        # self._output.write("  " * self._indentation + "<symbol> " +
-        #                    string_to_write + " </symbol>\n")
 
     def _write_int_const(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'integerConstant', current_father)
-        # self._output.write("  " * self._indentation + "<integerConstant> " +
-        #                    self._tokenizer.get_identifier() + " </integerConstant>\n")
 
     def _write_str_const(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'stringConstant', current_father)
-        # self._output.write("  " * self._indentation + "<stringConstant> " +
-        #                    self._tokenizer.get_identifier() + " </stringConstant>\n")
 
     def _create_element(self, element_name, element_type, current_father):
         current_xml_element = element_tree.SubElement(current_father, element_type)
