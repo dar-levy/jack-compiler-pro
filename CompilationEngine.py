@@ -387,7 +387,7 @@ class CompilationEngine:
 
     def _write_identifier(self):
         self._output.write("  " * self._indentation + "<identifier> " +
-                           self._tokenizer.identifier() + " </identifier>\n")
+                           self._tokenizer.get_identifier() + " </identifier>\n")
 
     def _write_keyword(self):
         self._output.write("  " * self._indentation + "<keyword> " +
@@ -406,8 +406,8 @@ class CompilationEngine:
 
     def _write_int_const(self):
         self._output.write("  " * self._indentation + "<integerConstant> " +
-                           self._tokenizer.identifier() + " </integerConstant>\n")
+                           self._tokenizer.get_identifier() + " </integerConstant>\n")
 
     def _write_str_const(self):
         self._output.write("  " * self._indentation + "<stringConstant> " +
-                           self._tokenizer.identifier() + " </stringConstant>\n")
+                           self._tokenizer.get_identifier() + " </stringConstant>\n")
