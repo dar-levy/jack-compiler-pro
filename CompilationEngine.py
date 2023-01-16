@@ -293,9 +293,9 @@ class CompilationEngine:
         sanity_check = True
         self._output.write("  " * self._indentation + "<term>\n")
         self._indentation += 1
-        if self._tokenizer.get_token_type() == self._tokenizer.INT_CONST:
+        if self._tokenizer.get_token_type() == self._tokenizer.DIGIT:
             self._write_int_const()
-        elif self._tokenizer.get_token_type() == self._tokenizer.STRING_CONST:
+        elif self._tokenizer.get_token_type() == self._tokenizer.STRING:
             self._write_str_const()
         elif self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword()
