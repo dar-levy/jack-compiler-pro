@@ -1,12 +1,23 @@
 from JackTokenizer import JackTokenizer
+import xml.etree.ElementTree as element_tree
 
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 class CompilationEngine:
     def __init__(self, input_file_path, output_path):
         self._tokenizer = JackTokenizer(input_file_path)
+        self.xml_root = element_tree.Element("class")
         self._output = open(output_path, "w+")
         self._indentation = 0
+
+    def compile(self):
+        self.compile_class()
+        element_tree.indent(self.xml_root)
+        xml_as_bytes = element_tree.tostring(self.xml_root, short_empty_elements=False)
+        xml_as_string = xml_as_bytes.decode("utf-8")
+        with open(self.output_file_path, "w") as file:
+            file.write(xml_as_string)
+        file.close()
 
     def compile_class(self):
         if self._tokenizer.hasMoreTokens():
