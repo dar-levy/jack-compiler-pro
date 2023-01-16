@@ -4,11 +4,11 @@ OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 class CompilationEngine:
     def __init__(self, input_file_path, output_path):
-        self._indentation = 0
         self._tokenizer = JackTokenizer(input_file_path)
         self._output = open(output_path, "w+")
+        self._indentation = 0
 
-    def compileClass(self):
+    def compile_class(self):
         if self._tokenizer.hasMoreTokens():
             self._tokenizer.advance()
             self._output.write("<class>\n")
@@ -33,8 +33,8 @@ class CompilationEngine:
             self._output.close()
 
     def _handle_var_dec(self):
-        while self._tokenizer.get_keyword() == "static" or \
-                self._tokenizer.get_keyword() == "field":
+        while self._tokenizer.get_keyword() == "field" or \
+                self._tokenizer.get_keyword() == "static":
             self.compileClassVarDec()
 
     def _handle_sub_routine(self):

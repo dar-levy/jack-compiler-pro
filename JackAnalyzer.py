@@ -17,14 +17,14 @@ class JackAnalyzer:
             input_file_path = self.directory_path
             output_file_path = f"{self.directory_path.split('.')[0]}.xml"
             current_code = CompilationEngine(input_file_path, output_file_path)
-            current_code.compileClass()
+            current_code.compile_class()
     def _read_directory(self):
         for file_name in os.listdir(self.input_path):
             if file_name.endswith(".jack"):
                 input_file_path = f"{self.input_path}/{file_name.split('.')[0]}.jack"
                 output_file_path = f"{self.input_path}/{file_name.split('.')[0]}.xml"
                 current_code = CompilationEngine(input_file_path, output_file_path)
-                current_code.compileClass()
+                current_code.compile_class()
 
 # The main program:
 if __name__ == "__main__":
