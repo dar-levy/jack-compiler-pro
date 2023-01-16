@@ -63,12 +63,6 @@ class JackTokenizer:
     def get_identifier(self):
         return self._currentToken
 
-    def get_int_val(self):
-        return int(self._currentToken)
-
-    def get_string_val(self):
-        return self._currentToken
-
 if __name__ == "__main__":
     tokenizer = JackTokenizer("Square/Square.jack")
     while tokenizer.hasMoreTokens():
