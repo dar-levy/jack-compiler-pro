@@ -35,7 +35,7 @@ class CompilationEngine:
     def _handle_var_dec(self):
         while self._tokenizer.get_keyword() == "field" or \
                 self._tokenizer.get_keyword() == "static":
-            self.compileClassVarDec()
+            self.compile_class_var_dec()
 
     def _handle_sub_routine(self):
         while self._tokenizer.get_keyword() == "constructor" or \
@@ -43,7 +43,7 @@ class CompilationEngine:
                 or self._tokenizer.get_keyword() == "method":
             self.compileSubroutine()
 
-    def compileClassVarDec(self):
+    def compile_class_var_dec(self):
         self._output.write("  " * self._indentation + "<classVarDec>\n")
         self._indentation += 1
         self._write_keyword()
