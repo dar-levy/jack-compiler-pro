@@ -15,15 +15,6 @@ IDENTIFIER_PATTERN = re.compile("^\s*([a-zA-Z_][a-zA-Z1-9_]*)\s*")
 DEBUGGING = False
 
 class JackTokenizer:
-    """
-    JackTokenizer module as described in NAND2Tetris chapter 10
-    """
-
-    keyword = ["CLASS", "METHOD", "FUNCTION", "CONSTRUCTOR", "INT",
-                "BOOLEAN", "CHAR", "VOID", "VAR", "STATIC", "FIELD", "LET",
-                "DO", "IF", "ELSE", "WHILE", "RETURN", "TRUE", "FALSE",
-                "NULL", "THIS"]
-
     KEYWORD = 0
     SYMBOL = 1
     INT_CONST = 2
