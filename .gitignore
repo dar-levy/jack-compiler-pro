@@ -1,0 +1,12 @@
+.idea
+*.pyc
+*.vm
+*.hack
+*.asm
+*.cmp
+*.out
+*.tst
+*.txt
+*.html
+*.xml
+*.jack
