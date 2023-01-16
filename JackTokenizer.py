@@ -1,16 +1,5 @@
 import re
-from Pattern import Pattern
-
-COMMENT = "(//.*)|(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)"
-EMPTY_TEXT_PATTERN = re.compile("\s*")
-KEY_WORD_PATTERN = re.compile("^\s*("
-                              "class|constructor|function|method|static|field"
-                              "|var|int|char|boolean|void|true|false|null|this|"
-                              "let|do|if|else|while|return)\s*")
-SYMBOL_PATTERN = re.compile("^\s*([{}()\[\].,;+\-*/&|<>=~])\s*")
-DIGIT_PATTERN = re.compile("^\s*(\d+)\s*")
-STRING_PATTERN = re.compile("^\s*\"(.*)\"\s*")
-IDENTIFIER_PATTERN = re.compile("^\s*([a-zA-Z_][a-zA-Z1-9_]*)\s*")
+import Patterns as pattern
 
 
 class JackTokenizer:
@@ -22,7 +11,6 @@ class JackTokenizer:
 
     def __init__(self, input_path):
         self.text = self._get_pure_data(input_path)
-        self.pattern = Pattern()
         self._tokenType = None
         self._currentToken = None
 
@@ -38,43 +26,43 @@ class JackTokenizer:
         return data
 
     def _clean_data(self, data):
-        return re.sub(COMMENT, "", data)
+        return re.sub(pattern.COMMENT, "", data)
 
     def hasMoreTokens(self):
-        if re.fullmatch(self.pattern.empty_text, self.text):
+        if re.fullmatch(pattern.EMPTY_TEXT, self.text):
             return False
         else:
             return True
 
     def advance(self):
         if self.hasMoreTokens():
-            current_match = re.match(self.pattern.keyword, self.text)
+            current_match = re.match(pattern.KEY_WORD, self.text)
             if current_match is not None:
-                self.text = re.sub(self.pattern.keyword, "", self.text)
+                self.text = re.sub(pattern.KEY_WORD, "", self.text)
                 self._tokenType = JackTokenizer.KEYWORD
                 self._currentToken = current_match.group(1)
             else:
-                current_match = re.match(self.pattern.symbol, self.text)
+                current_match = re.match(pattern.SYMBOL, self.text)
                 if current_match is not None:
-                    self.text = re.sub(self.pattern.symbol, "", self.text)
+                    self.text = re.sub(pattern.SYMBOL, "", self.text)
                     self._tokenType = JackTokenizer.SYMBOL
                     self._currentToken = current_match.group(1)
                 else:
-                    current_match = re.match(self.pattern.digit, self.text)
+                    current_match = re.match(pattern.DIGIT, self.text)
                     if current_match is not None:
-                        self.text = re.sub(self.pattern.digit, "", self.text)
+                        self.text = re.sub(pattern.DIGIT, "", self.text)
                         self._tokenType = JackTokenizer.INT_CONST
                         self._currentToken = current_match.group(1)
                     else:
-                        current_match = re.match(self.pattern.string, self.text)
+                        current_match = re.match(pattern.STRING, self.text)
                         if current_match is not None:
-                            self.text = re.sub(self.pattern.string, "", self.text)
+                            self.text = re.sub(pattern.STRING, "", self.text)
                             self._tokenType = JackTokenizer.STRING_CONST
                             self._currentToken = current_match.group(1)
                         else:
-                            current_match = re.match(self.pattern.identifier, self.text)
+                            current_match = re.match(pattern.IDENTIFIER, self.text)
                             if current_match is not None:
-                                self.text = re.sub(self.pattern.identifier, "", self.text)
+                                self.text = re.sub(pattern.IDENTIFIER, "", self.text)
                                 self._tokenType = JackTokenizer.IDENTIFIER
                                 self._currentToken = current_match.group(1)
 
