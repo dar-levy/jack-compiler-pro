@@ -12,7 +12,7 @@ class JackTokenizer:
     def __init__(self, input_path):
         self.text = self._get_pure_data(input_path)
         self._token_type = None
-        self._currentToken = None
+        self._current_token = None
 
     def _get_pure_data(self, input_path):
         file_data = self._read_file(input_path)
@@ -45,7 +45,7 @@ class JackTokenizer:
     def _update_properties(self, pattern, token_type, current_match):
         self.text = re.sub(pattern, "", self.text)
         self._token_type = token_type
-        self._currentToken = current_match.group(1)
+        self._current_token = current_match.group(1)
 
     def _update_properties_if(self, pattern, token_type):
         current_match = re.match(pattern, self.text)
@@ -55,13 +55,13 @@ class JackTokenizer:
         return self._token_type
 
     def get_keyword(self):
-        return self._currentToken
+        return self._current_token
 
     def get_symbol(self):
-        return self._currentToken
+        return self._current_token
 
     def get_identifier(self):
-        return self._currentToken
+        return self._current_token
 
 if __name__ == "__main__":
     tokenizer = JackTokenizer("Square/Square.jack")
