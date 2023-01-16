@@ -3,14 +3,7 @@ from JackTokenizer import JackTokenizer
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 class CompilationEngine:
-    """
-    effects the compilation engine
-    """
-
     def __init__(self, input_file_path, output_path):
-        """
-        :param fileToRead:
-        """
         self._indentation = 0
         self._tokenizer = JackTokenizer(input_file_path)
         self._output = open(output_path, "w+")
@@ -45,11 +38,6 @@ class CompilationEngine:
             self._output.close()
 
     def compileClassVarDec(self):
-        """
-        this should only print if there actually are class var decs,
-        should run on the recursively
-        :return:
-        """
         self._output.write("  " * self._indentation + "<classVarDec>\n")
         self._indentation += 1
         self._write_keyword()
