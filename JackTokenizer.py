@@ -95,7 +95,7 @@ class JackTokenizer:
         return self._currentToken
 
 if __name__ == "__main__" and DEBUGGING:
-    a = JackTokenizer("Square\Square.jack")
-    while a.hasMoreTokens():
-        a.advance()
-        print(a.keyWord())
+    tokenizer = JackTokenizer("Square\Square.jack")
+    while tokenizer.hasMoreTokens():
+        tokenizer.advance()
+        print(tokenizer.keyWord())
