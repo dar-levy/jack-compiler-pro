@@ -23,19 +23,25 @@ class CompilationEngine:
             self._write_symbol()
 
             self._tokenizer.advance()
-            while self._tokenizer.get_keyword() == "static" or \
-                    self._tokenizer.get_keyword() == "field":
-                self.compileClassVarDec()
-            while self._tokenizer.get_keyword() == "constructor" or \
-                    self._tokenizer.get_keyword() == "function" \
-                    or self._tokenizer.get_keyword() == "method":
-                self.compileSubroutine()
+            self._handle_var_dec()
+            self._handle_sub_routine()
 
             self._write_symbol()
 
             self._indentation -= 1
             self._output.write("</class>\n")
             self._output.close()
+
+    def _handle_var_dec(self):
+        while self._tokenizer.get_keyword() == "static" or \
+                self._tokenizer.get_keyword() == "field":
+            self.compileClassVarDec()
+
+    def _handle_sub_routine(self):
+        while self._tokenizer.get_keyword() == "constructor" or \
+                self._tokenizer.get_keyword() == "function" \
+                or self._tokenizer.get_keyword() == "method":
+            self.compileSubroutine()
 
     def compileClassVarDec(self):
         self._output.write("  " * self._indentation + "<classVarDec>\n")
