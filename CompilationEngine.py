@@ -418,12 +418,14 @@ class CompilationEngine:
         self._tokenizer.advance()
 
     def _write_identifier(self, current_father):
-        self._output.write("  " * self._indentation + "<identifier> " +
-                           self._tokenizer.get_identifier() + " </identifier>\n")
+        self._create_element(self._tokenizer.get_identifier(), 'identifier', current_father)
+        # self._output.write("  " * self._indentation + "<identifier> " +
+        #                    self._tokenizer.get_identifier() + " </identifier>\n")
 
     def _write_keyword(self, current_father):
-        self._output.write("  " * self._indentation + "<keyword> " +
-                           self._tokenizer.get_keyword() + " </keyword>\n")
+        self._create_element(self._tokenizer.get_keyword(), 'keyword', current_father)
+        # self._output.write("  " * self._indentation + "<keyword> " +
+        #                    self._tokenizer.get_keyword() + " </keyword>\n")
 
     def _write_symbol(self, current_father):
         string_to_write = self._tokenizer.get_symbol()
@@ -433,13 +435,21 @@ class CompilationEngine:
             string_to_write = "&gt;"
         elif self._tokenizer.get_symbol() == "&":
             string_to_write = "&amp;"
-        self._output.write("  " * self._indentation + "<symbol> " +
-                           string_to_write + " </symbol>\n")
+
+        self._create_element(string_to_write, 'symbol', current_father)
+        # self._output.write("  " * self._indentation + "<symbol> " +
+        #                    string_to_write + " </symbol>\n")
 
     def _write_int_const(self, current_father):
-        self._output.write("  " * self._indentation + "<integerConstant> " +
-                           self._tokenizer.get_identifier() + " </integerConstant>\n")
+        self._create_element(self._tokenizer.get_identifier(), 'integerConstant', current_father)
+        # self._output.write("  " * self._indentation + "<integerConstant> " +
+        #                    self._tokenizer.get_identifier() + " </integerConstant>\n")
 
     def _write_str_const(self, current_father):
-        self._output.write("  " * self._indentation + "<stringConstant> " +
-                           self._tokenizer.get_identifier() + " </stringConstant>\n")
+        self._create_element(self._tokenizer.get_identifier(), 'stringConstant', current_father)
+        # self._output.write("  " * self._indentation + "<stringConstant> " +
+        #                    self._tokenizer.get_identifier() + " </stringConstant>\n")
+
+    def _create_element(self, element_name, element_type, current_father):
+        current_xml_element = element_tree.SubElement(current_father, element_type)
+        current_xml_element.text = f' {element_name} '
