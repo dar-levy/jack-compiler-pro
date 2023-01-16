@@ -36,36 +36,21 @@ class JackTokenizer:
 
     def advance(self):
         if self.hasMoreTokens():
-            current_match = re.match(pattern.KEY_WORD, self.text)
-            if current_match is not None:
-                self.text = re.sub(pattern.KEY_WORD, "", self.text)
-                self._tokenType = JackTokenizer.KEYWORD
-                self._currentToken = current_match.group(1)
-            else:
-                current_match = re.match(pattern.SYMBOL, self.text)
-                if current_match is not None:
-                    self.text = re.sub(pattern.SYMBOL, "", self.text)
-                    self._tokenType = JackTokenizer.SYMBOL
-                    self._currentToken = current_match.group(1)
-                else:
-                    current_match = re.match(pattern.DIGIT, self.text)
-                    if current_match is not None:
-                        self.text = re.sub(pattern.DIGIT, "", self.text)
-                        self._tokenType = JackTokenizer.INT_CONST
-                        self._currentToken = current_match.group(1)
-                    else:
-                        current_match = re.match(pattern.STRING, self.text)
-                        if current_match is not None:
-                            self.text = re.sub(pattern.STRING, "", self.text)
-                            self._tokenType = JackTokenizer.STRING_CONST
-                            self._currentToken = current_match.group(1)
-                        else:
-                            current_match = re.match(pattern.IDENTIFIER, self.text)
-                            if current_match is not None:
-                                self.text = re.sub(pattern.IDENTIFIER, "", self.text)
-                                self._tokenType = JackTokenizer.IDENTIFIER
-                                self._currentToken = current_match.group(1)
+            self._update_properties_if(pattern.KEY_WORD, JackTokenizer.KEYWORD)
+            self._update_properties_if(pattern.SYMBOL, JackTokenizer.SYMBOL)
+            self._update_properties_if(pattern.DIGIT, JackTokenizer.INT_CONST)
+            self._update_properties_if(pattern.STRING, JackTokenizer.STRING_CONST)
+            self._update_properties_if(pattern.IDENTIFIER, JackTokenizer.IDENTIFIER)
 
+    def _update_properties(self, pattern, token_type, current_match):
+        self.text = re.sub(pattern, "", self.text)
+        self._tokenType = token_type
+        self._currentToken = current_match.group(1)
+
+    def _update_properties_if(self, pattern, token_type):
+        current_match = re.match(pattern, self.text)
+        if current_match is not None:
+            self._update_properties(pattern, token_type, current_match)
     def get_token_type(self):
         return self._tokenType
 
