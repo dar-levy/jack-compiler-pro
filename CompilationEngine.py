@@ -100,7 +100,7 @@ class CompilationEngine:
             self._tokenizer.advance()
             self._write_identifier()
             self._tokenizer.advance()
-            if self._tokenizer.symbol() == ",":
+            if self._tokenizer.get_symbol() == ",":
                 self._write_symbol()
                 self._tokenizer.advance()
 
@@ -144,7 +144,7 @@ class CompilationEngine:
         #subroutineCall
         self._write_identifier()
         self._tokenizer.advance()
-        if self._tokenizer.symbol() == ".":
+        if self._tokenizer.get_symbol() == ".":
             self._write_symbol()
             self._tokenizer.advance()
             self._write_identifier()
@@ -173,7 +173,7 @@ class CompilationEngine:
         self._write_identifier()
 
         self._tokenizer.advance()
-        if self._tokenizer.symbol() == "[":
+        if self._tokenizer.get_symbol() == "[":
             self._write_symbol()
             self._tokenizer.advance()
             self.compileExpression()
@@ -222,7 +222,7 @@ class CompilationEngine:
 
         self._tokenizer.advance()
         if self._tokenizer.tokenType() != self._tokenizer.SYMBOL and \
-                self._tokenizer.symbol() != ";":
+                self._tokenizer.get_symbol() != ";":
             self.compileExpression()
 
         self._write_symbol()
@@ -280,7 +280,7 @@ class CompilationEngine:
 
         self.compileTerm()
         while self._tokenizer.tokenType() == self._tokenizer.SYMBOL and \
-                self._tokenizer.symbol() in OP_LIST:
+                self._tokenizer.get_symbol() in OP_LIST:
             self._write_symbol()
             self._tokenizer.advance()
             self.compileTerm()
@@ -305,13 +305,13 @@ class CompilationEngine:
 
             self._tokenizer.advance()
             sanity_check = False
-            if self._tokenizer.symbol() == "[":
+            if self._tokenizer.get_symbol() == "[":
                 sanity_check = True
                 self._write_symbol()
                 self._tokenizer.advance()
                 self.compileExpression()
                 self._write_symbol()
-            elif self._tokenizer.symbol() == ".":  ## subroutine case
+            elif self._tokenizer.get_symbol() == ".":  ## subroutine case
                 sanity_check = True
                 self._write_symbol()
                 self._tokenizer.advance()
@@ -321,19 +321,19 @@ class CompilationEngine:
                 self._tokenizer.advance()
                 self.compileExpressionList()
                 self._write_symbol()
-            elif self._tokenizer.symbol() == "(":
+            elif self._tokenizer.get_symbol() == "(":
                 sanity_check = True
                 self._write_symbol()
                 self._tokenizer.advance()
                 self.compileExpressionList()
                 self._write_symbol()
 
-        elif self._tokenizer.symbol() == "(":
+        elif self._tokenizer.get_symbol() == "(":
             self._write_symbol()
             self._tokenizer.advance()
             self.compileExpression()
             self._write_symbol()
-        elif self._tokenizer.symbol() == "~" or self._tokenizer.symbol() == \
+        elif self._tokenizer.get_symbol() == "~" or self._tokenizer.get_symbol() == \
                 "-":
             self._write_symbol()
             self._tokenizer.advance()
@@ -351,17 +351,17 @@ class CompilationEngine:
         self._indentation += 1
 
         if self._tokenizer.tokenType() != self._tokenizer.SYMBOL and \
-                self._tokenizer.symbol() != ")":
+                self._tokenizer.get_symbol() != ")":
             self.compileExpression()
             while self._tokenizer.tokenType() == self._tokenizer.SYMBOL and \
-                    self._tokenizer.symbol() == ",":
+                    self._tokenizer.get_symbol() == ",":
                 self._write_symbol()
                 self._tokenizer.advance()
                 self.compileExpression()
-        if self._tokenizer.symbol() =="(":
+        if self._tokenizer.get_symbol() =="(":
             self.compileExpression()
             while self._tokenizer.tokenType() == self._tokenizer.SYMBOL and \
-                    self._tokenizer.symbol() == ",":
+                    self._tokenizer.get_symbol() == ",":
                 self._write_symbol()
                 self._tokenizer.advance()
                 self.compileExpression()
@@ -377,7 +377,7 @@ class CompilationEngine:
         self._tokenizer.advance()
         self._write_identifier()
         self._tokenizer.advance()
-        while self._tokenizer.symbol() == ",":
+        while self._tokenizer.get_symbol() == ",":
             self._write_symbol()
             self._tokenizer.advance()
             self._write_identifier()
@@ -394,12 +394,12 @@ class CompilationEngine:
                            self._tokenizer.get_keyword() + " </keyword>\n")
 
     def _write_symbol(self):
-        string_to_write = self._tokenizer.symbol()
-        if self._tokenizer.symbol() == "<":
+        string_to_write = self._tokenizer.get_symbol()
+        if self._tokenizer.get_symbol() == "<":
             string_to_write = "&lt"
-        elif self._tokenizer.symbol() == ">":
+        elif self._tokenizer.get_symbol() == ">":
             string_to_write = "&gt"
-        elif self._tokenizer.symbol() == "&":
+        elif self._tokenizer.get_symbol() == "&":
             string_to_write = "&amp"
         self._output.write("  " * self._indentation + "<symbol> " +
                            string_to_write + " </symbol>\n")
