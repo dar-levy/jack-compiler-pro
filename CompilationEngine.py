@@ -396,11 +396,11 @@ class CompilationEngine:
     def _write_symbol(self):
         string_to_write = self._tokenizer.get_symbol()
         if self._tokenizer.get_symbol() == "<":
-            string_to_write = "&lt"
+            string_to_write = "&lt;"
         elif self._tokenizer.get_symbol() == ">":
-            string_to_write = "&gt"
+            string_to_write = "&gt;"
         elif self._tokenizer.get_symbol() == "&":
-            string_to_write = "&amp"
+            string_to_write = "&amp;"
         self._output.write("  " * self._indentation + "<symbol> " +
                            string_to_write + " </symbol>\n")
 
