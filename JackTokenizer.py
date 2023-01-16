@@ -22,21 +22,23 @@ class JackTokenizer:
     IDENTIFIER = 4
 
     def __init__(self, input_path):
-        self.text = self._read_file(input_path)
-        self._clear_all_comments()
+        self.text = self._get_pure_data(input_path)
         self._tokenType = None
         self._currentToken = None
 
+    def _get_pure_data(self, input_path):
+        file_data = self._read_file(input_path)
+        return self._clean_data(file_data)
+
     def _read_file(self, input_path):
-        data = ''
         with open(input_path, "r") as file:
             data = file.read()
         file.close()
 
         return data
 
-    def _clear_all_comments(self):
-        self.text = re.sub(COMMENT, "", self.text)
+    def _clean_data(self, data):
+        return re.sub(COMMENT, "", data)
 
     def hasMoreTokens(self):
         if re.fullmatch(EMPTY_TEXT_PATTERN, self.text):
@@ -76,22 +78,22 @@ class JackTokenizer:
                                 self._tokenType = JackTokenizer.IDENTIFIER
                                 self._currentToken = current_match.group(1)
 
-    def tokenType(self):
+    def get_token_type(self):
         return self._tokenType
 
-    def keyWord(self):
+    def get_keyword(self):
         return self._currentToken
 
-    def symbol(self):
+    def get_symbol(self):
         return self._currentToken
 
-    def identifier(self):
+    def get_identifier(self):
         return self._currentToken
 
-    def intVal(self):
+    def get_int_val(self):
         return int(self._currentToken)
 
-    def stringVal(self):
+    def get_string_val(self):
         return self._currentToken
 
 if __name__ == "__main__" and DEBUGGING:
