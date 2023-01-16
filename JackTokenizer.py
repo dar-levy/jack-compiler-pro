@@ -12,8 +12,6 @@ STRING_PATTERN = re.compile("^\s*\"(.*)\"\s*")
 IDENTIFIER_PATTERN = re.compile("^\s*([a-zA-Z_][a-zA-Z1-9_]*)\s*")
 
 
-DEBUGGING = False
-
 class JackTokenizer:
     KEYWORD = 0
     SYMBOL = 1
@@ -96,8 +94,8 @@ class JackTokenizer:
     def get_string_val(self):
         return self._currentToken
 
-if __name__ == "__main__" and DEBUGGING:
+if __name__ == "__main__":
     tokenizer = JackTokenizer("Square\Square.jack")
     while tokenizer.hasMoreTokens():
         tokenizer.advance()
-        print(tokenizer.keyWord())
+        print(tokenizer.get_keyword())
