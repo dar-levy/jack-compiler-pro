@@ -1,399 +1,354 @@
 from JackTokenizer import JackTokenizer
+import xml.etree.ElementTree as element_tree
 
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 class CompilationEngine:
     def __init__(self, input_file_path, output_path):
-        self._indentation = 0
         self._tokenizer = JackTokenizer(input_file_path)
+        self.xml_root = element_tree.Element("class")
         self._output = open(output_path, "w+")
+        self.output_file_path = output_path
+        self._indentation = 0
 
-    def compileClass(self):
+    def compile(self):
+        self.compile_class()
+        element_tree.indent(self.xml_root)
+        xml_as_bytes = element_tree.tostring(self.xml_root, short_empty_elements=False)
+        with open(self.output_file_path, "wb") as file:
+            file.write(xml_as_bytes)
+        file.close()
+
+    def compile_class(self):
+        current_father = self.xml_root
         if self._tokenizer.hasMoreTokens():
             self._tokenizer.advance()
-            self._output.write("<class>\n")
-            self._indentation += 1
 
-            self._write_keyword()
+            self._write_keyword(current_father)
 
             self._tokenizer.advance()
-            self._write_identifier()
+            self._write_identifier(current_father)
 
             self._tokenizer.advance()
-            self._write_symbol()
+            self._write_symbol(current_father)
 
             self._tokenizer.advance()
-            while self._tokenizer.get_keyword() == "static" or \
-                    self._tokenizer.get_keyword() == "field":
-                self.compileClassVarDec()
-            while self._tokenizer.get_keyword() == "constructor" or \
-                    self._tokenizer.get_keyword() == "function" \
-                    or self._tokenizer.get_keyword() == "method":
-                self.compileSubroutine()
+            self._handle_var_dec(current_father)
+            self._handle_sub_routine(current_father)
 
-            self._write_symbol()
+            self._write_symbol(current_father)
 
-            self._indentation -= 1
-            self._output.write("</class>\n")
-            self._output.close()
+    def _handle_var_dec(self, current_father):
+        while self._tokenizer.get_keyword() == "field" or \
+                self._tokenizer.get_keyword() == "static":
+            self.compile_class_var_dec(current_father)
 
-    def compileClassVarDec(self):
-        self._output.write("  " * self._indentation + "<classVarDec>\n")
-        self._indentation += 1
-        self._write_keyword()
+    def _handle_sub_routine(self, current_father):
+        while self._tokenizer.get_keyword() == "constructor" or \
+                self._tokenizer.get_keyword() == "function" \
+                or self._tokenizer.get_keyword() == "method":
+            self.compile_subroutine(current_father)
+
+    def compile_class_var_dec(self, current_father):
+        new_father = element_tree.SubElement(current_father, "classVarDec")
+        self._write_keyword(new_father)
 
         self._tokenizer.advance()
-        self._compile_type_and_varName()
+        self._compile_type_and_varName(new_father)
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</classVarDec>\n")
-
-    def compileSubroutine(self):
-        self._output.write("  " * self._indentation + "<subroutineDec>\n")
-        self._indentation += 1
-        self._write_keyword()
+    def compile_subroutine(self, current_father):
+        new_father = element_tree.SubElement(current_father, "subroutineDec")
+        self._write_keyword(new_father)
 
         self._tokenizer.advance()
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
-            self._write_keyword()
+            self._write_keyword(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
-            self._write_identifier()
+            self._write_identifier(new_father)
 
         self._tokenizer.advance()
-        self._write_identifier()
+        self._write_identifier(new_father)
 
         self._tokenizer.advance()
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compileParameterList()
+        self.compile_parameter_list(new_father)
 
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        # compile subroutineBody:
-        self._output.write("  " * self._indentation + "<subroutineBody>\n")
-        self._indentation += 1
-        self._write_symbol()
+
+        self.compile_subroutine_body(new_father)
+
+        self._tokenizer.advance()
+
+    def compile_subroutine_body(self, current_father):
+        new_father = element_tree.SubElement(current_father, "subroutineBody")
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
         while self._tokenizer.get_keyword() == "var":
-            self.compileVarDec()
+            self.compile_var_dec(new_father)
 
-        self.compileStatements()
+        self.compile_statements(new_father)
 
-        self._write_symbol()
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</subroutineBody>\n")
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</subroutineDec>\n")
-        self._tokenizer.advance()
+        self._write_symbol(new_father)
 
-    def compileParameterList(self):
-        self._output.write("  " * self._indentation + "<parameterList>\n")
-        self._indentation += 1
+    def compile_parameter_list(self, current_father):
+        new_father = element_tree.SubElement(current_father, "parameterList")
         while self._tokenizer.get_token_type() != self._tokenizer.SYMBOL:
             if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
-                self._write_keyword()
+                self._write_keyword(new_father)
             elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
-                self._write_identifier()
+                self._write_identifier(new_father)
             self._tokenizer.advance()
-            self._write_identifier()
+            self._write_identifier(new_father)
             self._tokenizer.advance()
             if self._tokenizer.get_symbol() == ",":
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</parameterList>\n")
-
-    def compileVarDec(self):
-        self._output.write("  " * self._indentation + "<varDec>\n")
-        self._indentation += 1
-
-        self._write_keyword()
+    def compile_var_dec(self, current_father):
+        new_father = element_tree.SubElement(current_father, "varDec")
+        self._write_keyword(new_father)
         self._tokenizer.advance()
-        self._compile_type_and_varName()
+        self._compile_type_and_varName(new_father)
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</varDec>\n")
-
-    def compileStatements(self):
-        self._output.write("  " * self._indentation + "<statements>\n")
-        self._indentation += 1
+    def compile_statements(self, current_father):
+        new_father = element_tree.SubElement(current_father, "statements")
         while self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             if self._tokenizer.get_keyword() == "let":
-                self.compileLet()
+                self.compile_let(new_father)
             elif self._tokenizer.get_keyword() == "if":
-                self.compileIf()
+                self.compile_if(new_father)
             elif self._tokenizer.get_keyword() == "while":
-                self.compileWhile()
+                self.compile_while(new_father)
             elif self._tokenizer.get_keyword() == "do":
-                self.compileDo()
+                self.compile_do(new_father)
             elif self._tokenizer.get_keyword() == "return":
-                self.compileReturn()
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</statements>\n")
+                self.compile_return(new_father)
 
-    def compileDo(self):
-        self._output.write("  " * self._indentation + "<doStatement>\n")
-        self._indentation += 1
-        self._write_keyword()
+    def compile_do(self, current_father):
+        new_father = element_tree.SubElement(current_father, "doStatement")
+        self._write_keyword(new_father)
 
         self._tokenizer.advance()
-        #subroutineCall
-        self._write_identifier()
+
+        self._write_identifier(new_father)
         self._tokenizer.advance()
         if self._tokenizer.get_symbol() == ".":
-            self._write_symbol()
+            self._write_symbol(new_father)
             self._tokenizer.advance()
-            self._write_identifier()
+            self._write_identifier(new_father)
             self._tokenizer.advance()
 
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compileExpressionList()
+        self.compile_expression_list(new_father)
 
-        self._write_symbol()
-
-        self._tokenizer.advance()
-        self._write_symbol()
-
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</doStatement>\n")
-        self._tokenizer.advance()
-
-    def compileLet(self):
-        self._output.write("  " * self._indentation + "<letStatement>\n")
-        self._indentation += 1
-        self._write_keyword()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self._write_identifier()
+        self._write_symbol(new_father)
+
+        self._tokenizer.advance()
+
+    def compile_let(self, current_father):
+        new_father = element_tree.SubElement(current_father, "letStatement")
+        self._write_keyword(new_father)
+
+        self._tokenizer.advance()
+        self._write_identifier(new_father)
 
         self._tokenizer.advance()
         if self._tokenizer.get_symbol() == "[":
-            self._write_symbol()
+            self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compileExpression()
-            self._write_symbol()
+            self.compile_expression(new_father)
+            self._write_symbol(new_father)
             self._tokenizer.advance()
 
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compileExpression()
-        self._write_symbol()
-
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</letStatement>\n")
-        self._tokenizer.advance()
-
-    def compileWhile(self):
-        self._output.write("  " * self._indentation + "<whileStatement>\n")
-        self._indentation += 1
-        self._write_keyword()
+        self.compile_expression(new_father)
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self._write_symbol()
+
+    def compile_while(self, current_father):
+        new_father = element_tree.SubElement(current_father, "whileStatement")
+        self._write_keyword(new_father)
 
         self._tokenizer.advance()
-        self.compileExpression()
-
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self._write_symbol()
+        self.compile_expression(new_father)
+
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compileStatements()
+        self._write_symbol(new_father)
 
-        self._write_symbol()
+        self._tokenizer.advance()
+        self.compile_statements(new_father)
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</whileStatement>\n")
+        self._write_symbol(new_father)
         self._tokenizer.advance()
 
-    def compileReturn(self):
-        self._output.write("  " * self._indentation + "<returnStatement>\n")
-        self._indentation += 1
-        self._write_keyword()
+    def compile_return(self, current_father):
+        new_father = element_tree.SubElement(current_father, "returnStatement")
+        self._write_keyword(new_father)
 
         self._tokenizer.advance()
         if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ";":
-            self.compileExpression()
+            self.compile_expression(new_father)
 
-        self._write_symbol()
-
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</returnStatement>\n")
+        self._write_symbol(new_father)
         self._tokenizer.advance()
 
-    def compileIf(self):
-        self._output.write("  " * self._indentation + "<ifStatement>\n")
-        self._indentation += 1
-        self._write_keyword()
+    def compile_if(self, current_father):
+        new_father = element_tree.SubElement(current_father, "ifStatement")
+        self._write_keyword(new_father)
 
         self._tokenizer.advance()
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compileExpression()
+        self.compile_expression(new_father)
 
-        self._write_symbol()
-
-        self._tokenizer.advance()
-        self._write_symbol()
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compileStatements()
+        self._write_symbol(new_father)
 
-        self._write_symbol()
+        self._tokenizer.advance()
+        self.compile_statements(new_father)
+
+        self._write_symbol(new_father)
 
         self._tokenizer.advance()
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD and \
                 self._tokenizer.get_keyword() == "else":
-            self._write_keyword()
+            self._write_keyword(new_father)
 
             self._tokenizer.advance()
-            self._write_symbol()
+            self._write_symbol(new_father)
 
             self._tokenizer.advance()
-            self.compileStatements()
+            self.compile_statements(new_father)
 
-            self._write_symbol()
+            self._write_symbol(new_father)
             self._tokenizer.advance()
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</ifStatement>\n")
 
-
-    def compileExpression(self):
-        """
-        Note that tokenizer must be advanced before this is called!!!
-        :return:
-        """
-        self._output.write("  " * self._indentation + "<expression>\n")
-        self._indentation += 1
-
-        self.compileTerm()
+    def compile_expression(self, current_father):
+        new_father = element_tree.SubElement(current_father, "expression")
+        self.compile_term(new_father)
         while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() in OP_LIST:
-            self._write_symbol()
+            self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compileTerm()
+            self.compile_term(new_father)
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</expression>\n")
-
-    def compileTerm(self):
-        # debugging - not finished!!
+    def compile_term(self, current_father):
         sanity_check = True
-        self._output.write("  " * self._indentation + "<term>\n")
-        self._indentation += 1
+        new_father = element_tree.SubElement(current_father, "term")
         if self._tokenizer.get_token_type() == self._tokenizer.DIGIT:
-            self._write_int_const()
+            self._write_int_const(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.STRING:
-            self._write_str_const()
+            self._write_str_const(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
-            self._write_keyword()
+            self._write_keyword(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
-            self._write_identifier()
+            self._write_identifier(new_father)
 
 
             self._tokenizer.advance()
             sanity_check = False
             if self._tokenizer.get_symbol() == "[":
                 sanity_check = True
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compileExpression()
-                self._write_symbol()
-            elif self._tokenizer.get_symbol() == ".":  ## subroutine case
+                self.compile_expression(new_father)
+                self._write_symbol(new_father)
+            elif self._tokenizer.get_symbol() == ".":
                 sanity_check = True
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self._write_identifier()
+                self._write_identifier(new_father)
                 self._tokenizer.advance()
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compileExpressionList()
-                self._write_symbol()
+                self.compile_expression_list(new_father)
+                self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == "(":
                 sanity_check = True
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compileExpressionList()
-                self._write_symbol()
+                self.compile_expression_list(new_father)
+                self._write_symbol(new_father)
 
         elif self._tokenizer.get_symbol() == "(":
-            self._write_symbol()
+            self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compileExpression()
-            self._write_symbol()
+            self.compile_expression(new_father)
+            self._write_symbol(new_father)
         elif self._tokenizer.get_symbol() == "~" or self._tokenizer.get_symbol() == \
                 "-":
-            self._write_symbol()
+            self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compileTerm()
+            self.compile_term(new_father)
             sanity_check = False
 
         if sanity_check:
             self._tokenizer.advance()
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</term>\n")
-
-    def compileExpressionList(self):
-        self._output.write("  " * self._indentation + "<expressionList>\n")
-        self._indentation += 1
-
+    def compile_expression_list(self, current_father):
+        new_father = element_tree.SubElement(current_father, "expressionList")
         if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ")":
-            self.compileExpression()
+            self.compile_expression(new_father)
             while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compileExpression()
+                self.compile_expression(new_father)
         if self._tokenizer.get_symbol() =="(":
-            self.compileExpression()
+            self.compile_expression(new_father)
             while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
-                self._write_symbol()
+                self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compileExpression()
+                self.compile_expression(new_father)
 
-        self._indentation -= 1
-        self._output.write("  " * self._indentation + "</expressionList>\n")
-
-    def _compile_type_and_varName(self):
+    def _compile_type_and_varName(self, current_father):
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
-            self._write_keyword()
+            self._write_keyword(current_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
-            self._write_identifier()
+            self._write_identifier(current_father)
         self._tokenizer.advance()
-        self._write_identifier()
+        self._write_identifier(current_father)
         self._tokenizer.advance()
         while self._tokenizer.get_symbol() == ",":
-            self._write_symbol()
+            self._write_symbol(current_father)
             self._tokenizer.advance()
-            self._write_identifier()
+            self._write_identifier(current_father)
             self._tokenizer.advance()
-        self._write_symbol()
+        self._write_symbol(current_father)
         self._tokenizer.advance()
 
-    def _write_identifier(self):
-        self._output.write("  " * self._indentation + "<identifier> " +
-                           self._tokenizer.get_identifier() + " </identifier>\n")
+    def _write_identifier(self, current_father):
+        self._create_element(self._tokenizer.get_identifier(), 'identifier', current_father)
 
-    def _write_keyword(self):
-        self._output.write("  " * self._indentation + "<keyword> " +
-                           self._tokenizer.get_keyword() + " </keyword>\n")
+    def _write_keyword(self, current_father):
+        self._create_element(self._tokenizer.get_keyword(), 'keyword', current_father)
 
-    def _write_symbol(self):
+    def _write_symbol(self, current_father):
         string_to_write = self._tokenizer.get_symbol()
         if self._tokenizer.get_symbol() == "<":
             string_to_write = "&lt;"
@@ -401,13 +356,15 @@ class CompilationEngine:
             string_to_write = "&gt;"
         elif self._tokenizer.get_symbol() == "&":
             string_to_write = "&amp;"
-        self._output.write("  " * self._indentation + "<symbol> " +
-                           string_to_write + " </symbol>\n")
 
-    def _write_int_const(self):
-        self._output.write("  " * self._indentation + "<integerConstant> " +
-                           self._tokenizer.get_identifier() + " </integerConstant>\n")
+        self._create_element(string_to_write, 'symbol', current_father)
 
-    def _write_str_const(self):
-        self._output.write("  " * self._indentation + "<stringConstant> " +
-                           self._tokenizer.get_identifier() + " </stringConstant>\n")
+    def _write_int_const(self, current_father):
+        self._create_element(self._tokenizer.get_identifier(), 'integerConstant', current_father)
+
+    def _write_str_const(self, current_father):
+        self._create_element(self._tokenizer.get_identifier(), 'stringConstant', current_father)
+
+    def _create_element(self, element_name, element_type, current_father):
+        current_xml_element = element_tree.SubElement(current_father, element_type)
+        current_xml_element.text = f' {element_name} '

@@ -1,52 +1,32 @@
 import sys
-import re
-from os import listdir
-from os.path import isfile, isdir
+import os
+from os import path
 from CompilationEngine import CompilationEngine
 
-INVALID_ARGS = "The file given as input is invalid..."
-NUMBER_OF_ARGS = 2
-XML_SUFFIX = ".xml"
-VM_SUFFIX = ".vm"
-JACK_SUFFIX = ".jack$"
-VALID_INPUT_SUFFIX = ".*\.jack$"
-JACK_SUFFIX_PATTERN = re.compile(VALID_INPUT_SUFFIX)
-COMMENT = "//.*$"
+class JackAnalyzer:
+    def __init__(self, directory_path):
+        self.directory_path = directory_path
+        self.input_path = path.dirname(directory_path) if path.isfile(directory_path) else directory_path
 
-def get_files(args):
-    """
-    :param args: the arguments given to the program.
-    :return: the list of paths to .jack files
-    """
-    list_of_files_path = []
-    if len(args) == NUMBER_OF_ARGS:
-        if isfile(args[1]) and JACK_SUFFIX_PATTERN.match(args[1]):
-            list_of_files_path.append(args[1])
-        elif isdir(args[1]):
-            for file in listdir(args[1]):
-                if JACK_SUFFIX_PATTERN.match(file):
-                    list_of_files_path.append(args[1] + "/" + file)
-        return list_of_files_path
-    else:
-        print(INVALID_ARGS)
-        exit()
+    def analyze(self):
+        if path.isfile(self.directory_path): self._read_file()
+        else: self._read_directory()
 
-
-def file_output_path(file_path):
-    """
-    :param file_path: The original file path
-    :return: the path to the output file (.xml).
-    """
-    temp_path = re.sub(JACK_SUFFIX, XML_SUFFIX, file_path)
-    return temp_path
+    def _read_file(self):
+        if self.directory_path.endswith(".jack"):
+            input_file_path = self.directory_path
+            output_file_path = f"{self.directory_path.split('.')[0]}.xml"
+            current_code = CompilationEngine(input_file_path, output_file_path)
+            current_code.compile()
+    def _read_directory(self):
+        for file_name in os.listdir(self.input_path):
+            if file_name.endswith(".jack"):
+                input_file_path = f"{self.input_path}/{file_name.split('.')[0]}.jack"
+                output_file_path = f"{self.input_path}/{file_name.split('.')[0]}.xml"
+                current_code = CompilationEngine(input_file_path, output_file_path)
+                current_code.compile()
 
 # The main program:
 if __name__ == "__main__":
-    """
-    The program create a new instance of CompilationEngine for every given 
-    .jack file. The instance will create the desired .vm file.
-    """
-    list_of_files_path = get_files(sys.argv)
-    for file_path in list_of_files_path:
-        current_code = CompilationEngine(file_path, file_output_path(file_path))
-        current_code.compileClass()
+    jack_analyzer = JackAnalyzer(sys.argv[1])
+    jack_analyzer.analyze()

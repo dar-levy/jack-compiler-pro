@@ -3,10 +3,10 @@ import Patterns as pattern
 
 
 class JackTokenizer:
-    KEYWORD = 0
-    SYMBOL = 1
-    DIGIT = 2
-    STRING = 3
+    DIGIT = 0
+    STRING = 1
+    SYMBOL = 2
+    KEYWORD = 3
     IDENTIFIER = 4
 
     def __init__(self, input_path):
