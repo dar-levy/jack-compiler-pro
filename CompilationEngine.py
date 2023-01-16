@@ -23,12 +23,12 @@ class CompilationEngine:
             self._write_symbol()
 
             self._tokenizer.advance()
-            while self._tokenizer.keyWord() == "static" or \
-                    self._tokenizer.keyWord() == "field":
+            while self._tokenizer.get_keyword() == "static" or \
+                    self._tokenizer.get_keyword() == "field":
                 self.compileClassVarDec()
-            while self._tokenizer.keyWord() == "constructor" or \
-                    self._tokenizer.keyWord() == "function" \
-                    or self._tokenizer.keyWord() == "method":
+            while self._tokenizer.get_keyword() == "constructor" or \
+                    self._tokenizer.get_keyword() == "function" \
+                    or self._tokenizer.get_keyword() == "method":
                 self.compileSubroutine()
 
             self._write_symbol()
@@ -77,7 +77,7 @@ class CompilationEngine:
         self._write_symbol()
 
         self._tokenizer.advance()
-        while self._tokenizer.keyWord() == "var":
+        while self._tokenizer.get_keyword() == "var":
             self.compileVarDec()
 
         self.compileStatements()
@@ -122,15 +122,15 @@ class CompilationEngine:
         self._output.write("  " * self._indentation + "<statements>\n")
         self._indentation += 1
         while self._tokenizer.tokenType() == self._tokenizer.KEYWORD:
-            if self._tokenizer.keyWord() == "let":
+            if self._tokenizer.get_keyword() == "let":
                 self.compileLet()
-            elif self._tokenizer.keyWord() == "if":
+            elif self._tokenizer.get_keyword() == "if":
                 self.compileIf()
-            elif self._tokenizer.keyWord() == "while":
+            elif self._tokenizer.get_keyword() == "while":
                 self.compileWhile()
-            elif self._tokenizer.keyWord() == "do":
+            elif self._tokenizer.get_keyword() == "do":
                 self.compileDo()
-            elif self._tokenizer.keyWord() == "return":
+            elif self._tokenizer.get_keyword() == "return":
                 self.compileReturn()
         self._indentation -= 1
         self._output.write("  " * self._indentation + "</statements>\n")
@@ -254,7 +254,7 @@ class CompilationEngine:
 
         self._tokenizer.advance()
         if self._tokenizer.tokenType() == self._tokenizer.KEYWORD and \
-                self._tokenizer.keyWord() == "else":
+                self._tokenizer.get_keyword() == "else":
             self._write_keyword()
 
             self._tokenizer.advance()
@@ -391,7 +391,7 @@ class CompilationEngine:
 
     def _write_keyword(self):
         self._output.write("  " * self._indentation + "<keyword> " +
-                           self._tokenizer.keyWord() + " </keyword>\n")
+                           self._tokenizer.get_keyword() + " </keyword>\n")
 
     def _write_symbol(self):
         string_to_write = self._tokenizer.symbol()
