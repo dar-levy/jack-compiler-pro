@@ -15,9 +15,8 @@ class CompilationEngine:
         self.compile_class()
         element_tree.indent(self.xml_root)
         xml_as_bytes = element_tree.tostring(self.xml_root, short_empty_elements=False)
-        xml_as_string = xml_as_bytes.decode("utf-8")
-        with open(self.output_file_path, "w") as file:
-            file.write(xml_as_string)
+        with open(self.output_file_path, "wb") as file:
+            file.write(xml_as_bytes)
         file.close()
 
     def compile_class(self):
