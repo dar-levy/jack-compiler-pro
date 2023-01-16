@@ -21,12 +21,19 @@ class JackTokenizer:
     STRING_CONST = 3
     IDENTIFIER = 4
 
-    def __init__(self, input_file_path):
-        with open(input_file_path, "r") as file:
-            self.text = file.read()
+    def __init__(self, input_path):
+        self.text = self._read_file(input_path)
         self._clear_all_comments()
         self._tokenType = None
         self._currentToken = None
+
+    def _read_file(self, input_path):
+        data = ''
+        with open(input_path, "r") as file:
+            data = file.read()
+        file.close()
+
+        return data
 
     def _clear_all_comments(self):
         self.text = re.sub(COMMENT, "", self.text)
