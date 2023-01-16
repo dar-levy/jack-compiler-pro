@@ -42,15 +42,15 @@ class JackTokenizer:
             self._update_properties_if(pattern.STRING, JackTokenizer.STRING)
             self._update_properties_if(pattern.IDENTIFIER, JackTokenizer.IDENTIFIER)
 
-    def _update_properties(self, pattern, token_type, current_match):
-        self.text = re.sub(pattern, "", self.text)
+    def _update_properties(self, current_pattern, token_type, current_match):
+        self.text = re.sub(current_pattern, "", self.text)
         self._token_type = token_type
         self._current_token = current_match.group(1)
 
-    def _update_properties_if(self, pattern, token_type):
-        current_match = re.match(pattern, self.text)
+    def _update_properties_if(self, current_pattern, token_type):
+        current_match = re.match(current_pattern, self.text)
         if current_match is not None:
-            self._update_properties(pattern, token_type, current_match)
+            self._update_properties(current_pattern, token_type, current_match)
     def get_token_type(self):
         return self._token_type
 
