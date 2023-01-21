@@ -7,7 +7,6 @@ class CompilationEngine:
     def __init__(self, input_file_path, output_path):
         self._tokenizer = JackTokenizer(input_file_path)
         self.xml_root = element_tree.Element("class")
-        self._output = open(output_path, "w+")
         self.output_file_path = output_path
         self._indentation = 0
 
