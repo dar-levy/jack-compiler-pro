@@ -20,7 +20,7 @@ label_count = 0
 class CompilationEngine:
     def __init__(self,tokenizer, vm_file):
         self.xml_root = element_tree.Element("class")
-        self.vm_writer = VMGenerator.VMWriter(vm_file)
+        self.vm_writer = VMGenerator.VMGenerator(vm_file)
         self._tokenizer = tokenizer
 
     @staticmethod
