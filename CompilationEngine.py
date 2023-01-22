@@ -165,11 +165,11 @@ class CompilationEngine:
     def compile_do(self, current_father):
         new_father = element_tree.SubElement(current_father, "doStatement")
         self._write_keyword(new_father)
-
         self._tokenizer.advance()
 
         self._write_identifier(new_father)
         self._tokenizer.advance()
+
         if self._tokenizer.get_symbol() == ".":
             self._write_symbol(new_father)
             self._tokenizer.advance()
@@ -177,15 +177,14 @@ class CompilationEngine:
             self._tokenizer.advance()
 
         self._write_symbol(new_father)
-
         self._tokenizer.advance()
+
         self.compile_expression_list(new_father)
 
         self._write_symbol(new_father)
-
         self._tokenizer.advance()
-        self._write_symbol(new_father)
 
+        self._write_symbol(new_father)
         self._tokenizer.advance()
 
     def compile_let(self, current_father):
@@ -331,26 +330,43 @@ class CompilationEngine:
 
                 self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == ".":
-                default_call = False
                 sanity_check = True
 
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
+                function_object = jack_subroutine.get_symbol(token_value)
 
                 self._write_identifier(new_father)
+                function_name = self._tokenizer.get_identifier()
                 self._tokenizer.advance()
+
+                if function_object:
+                    function_class = token_var.type  # Use the class of the object
+                    arg_count = 1  # Add 'this' to args
+                    self.vm_writer.write_push_symbol(token_var)  # push "this"
+                else:
+                    function_class = token_value
 
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
 
-                self.compile_expression_list(new_father, jack_subroutine)
+                arg_count += self.compile_expression_list(new_father, jack_subroutine)
+                self.vm_writer.write_call(function_class, function_name, arg_count)
+
                 self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == "(":
                 sanity_check = True
+                arg_count = 1
+                self.vm_writer.write_push('pointer', 0)
+
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compile_expression_list(new_father, jack_subroutine)
+                arg_count += self.compile_expression_list(new_father, jack_subroutine)
+                self.vm_writer.write_call(function_class, function_name, arg_count)
+
                 self._write_symbol(new_father)
+            elif token_var:
+                self.vm_writer.write_push_symbol(token_var)
 
         elif self._tokenizer.get_symbol() == "(":
             self._write_symbol(new_father)
@@ -373,23 +389,28 @@ class CompilationEngine:
         if sanity_check:
             self._tokenizer.advance()
 
-    def compile_expression_list(self, current_father):
+
+    def compile_expression_list(self, current_father, jack_subroutine):
+        count = 0
         new_father = element_tree.SubElement(current_father, "expressionList")
         if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ")":
-            self.compile_expression(new_father)
+            self.compile_expression(new_father, jack_subroutine)
             while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compile_expression(new_father)
-        if self._tokenizer.get_symbol() =="(":
-            self.compile_expression(new_father)
+                count += 1
+                self.compile_expression(new_father, jack_subroutine)
+        if self._tokenizer.get_symbol() == "(":
+            self.compile_expression(new_father, jack_subroutine)
             while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compile_expression(new_father)
+                self.compile_expression(new_father, jack_subroutine)
+
+        return count
 
     def _compile_type_and_varName(self, current_father, jack_element, current_type=None):
         var_type = self._tokenizer.get_token_type()
