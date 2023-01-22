@@ -2,18 +2,15 @@ import VMGenerator
 import JackObjects
 import xml.etree.ElementTree as element_tree
 
-OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
-
-binary_op_actions = {'+': 'add',
+BINARY_OPS = {'+': 'add',
                      '-': 'sub',
-                     '*': 'call Math.multiply 2',
                      '/': 'call Math.divide 2',
-                     '&': 'and',
+                     '*': 'call Math.multiply 2',
                      '|': 'or',
+                     '&': 'and',
                      '<': 'lt',
                      '>': 'gt',
                      '=': 'eq'}
-
 
 label_count = 0
 
@@ -327,12 +324,12 @@ class CompilationEngine:
         new_father = element_tree.SubElement(current_father, "expression")
         self.compile_term(new_father, jack_subroutine)
         while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
-                self._tokenizer.get_symbol() in OP_LIST:
+                self._tokenizer.get_symbol() in BINARY_OPS.keys():
             binary_op = self._tokenizer.get_symbol()
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_term(new_father, jack_subroutine)
-            self.vm_writer.write(binary_op_actions[binary_op])
+            self.vm_writer.write(BINARY_OPS[binary_op])
 
     def compile_term(self, current_father, jack_subroutine):
         sanity_check = True
