@@ -5,12 +5,24 @@ import xml.etree.ElementTree as element_tree
 
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
+binary_op_actions = {'+': 'add',
+                     '-': 'sub',
+                     '*': 'call Math.multiply 2',
+                     '/': 'call Math.divide 2',
+                     '&': 'and',
+                     '|': 'or',
+                     '<': 'lt',
+                     '>': 'gt',
+                     '=': 'eq'}
+
+
+label_count = 0
+
 class CompilationEngine:
-    def __init__(self,tokenizer, ostream):
-        self._tokenizer = tokenizer
+    def __init__(self,tokenizer, vm_file):
         self.xml_root = element_tree.Element("class")
-        self.vm_writer = VMWriter.VMWriter(ostream)
-        # self.output_file_path = output_path
+        self.vm_writer = VMWriter.VMWriter(vm_file)
+        self._tokenizer = tokenizer
         self._indentation = 0
 
     @staticmethod
@@ -317,9 +329,11 @@ class CompilationEngine:
         self.compile_term(new_father, jack_subroutine)
         while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() in OP_LIST:
+            binary_op = self._tokenizer.get_symbol()
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_term(new_father, jack_subroutine)
+            self.vm_writer.write(binary_op_actions[binary_op])
 
     def compile_term(self, current_father, jack_subroutine):
         sanity_check = True
