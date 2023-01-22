@@ -195,27 +195,44 @@ class CompilationEngine:
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
-    def compile_let(self, current_father):
+    def compile_let(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "letStatement")
         self._write_keyword(new_father)
-
         self._tokenizer.advance()
+
+        jack_symbol = jack_subroutine.get_symbol(self._tokenizer.get_symbol())
+
         self._write_identifier(new_father)
-
         self._tokenizer.advance()
+
         if self._tokenizer.get_symbol() == "[":
             self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compile_expression(new_father)
+
+            self.compile_expression(new_father, jack_subroutine)
+
             self._write_symbol(new_father)
             self._tokenizer.advance()
 
-        self._write_symbol(new_father)
+            self._write_symbol(new_father)
+            self._tokenizer.advance()
 
-        self._tokenizer.advance()
-        self.compile_expression(new_father)
-        self._write_symbol(new_father)
+            self.vm_writer.write_push_symbol(jack_symbol)
+            self.vm_writer.write('add')
 
+            self.compile_expression(new_father, jack_subroutine)
+
+            self.vm_writer.write_pop('temp', 0)
+            self.vm_writer.write_pop('pointer', 1)
+            self.vm_writer.write_push('temp', 0)
+            self.vm_writer.write_pop('that', 0)
+        else:
+            self._write_symbol(new_father)
+            self._tokenizer.advance()
+            self.compile_expression(new_father, jack_subroutine)
+            self.vm_writer.write_pop_symbol(jack_symbol)
+
+        self._write_symbol(new_father)
         self._tokenizer.advance()
 
     def compile_while(self, current_father, jack_subroutine):
