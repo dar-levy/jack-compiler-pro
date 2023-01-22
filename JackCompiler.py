@@ -3,12 +3,12 @@ import os
 from os import path
 from CompilationEngine import CompilationEngine
 from JackTokenizer import JackTokenizer
-class JackAnalyzer:
+class JackCompiler:
     def __init__(self, directory_path):
         self.directory_path = directory_path
         self.input_path = path.dirname(directory_path) if path.isfile(directory_path) else directory_path
 
-    def analyze(self):
+    def compile(self):
         if path.isfile(self.directory_path): self._read_file()
         else: self._read_directory()
 
@@ -38,5 +38,5 @@ class JackAnalyzer:
 
 # The main program:
 if __name__ == "__main__":
-    jack_analyzer = JackAnalyzer(sys.argv[1])
-    jack_analyzer.analyze()
+    jack_compiler = JackCompiler(sys.argv[1])
+    jack_compiler.compile()
