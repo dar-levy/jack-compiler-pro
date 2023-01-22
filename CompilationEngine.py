@@ -305,24 +305,44 @@ class CompilationEngine:
                     self.vm_writer.write('not')
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier(new_father)
-
-
+            token_value = self._tokenizer.get_identifier()
+            token_var = jack_subroutine.get_symbol(self._tokenizer.get_identifier())
             self._tokenizer.advance()
+
+            function_name = token_value
+            function_class = jack_subroutine.jack_class.name
+            # Used to mark whether to use the default call, a method one
+            default_call = True
+            arg_count = 0
+
             sanity_check = False
+
             if self._tokenizer.get_symbol() == "[":
                 sanity_check = True
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
+
                 self.compile_expression(new_father, jack_subroutine)
+                self.vm_writer.write_push_symbol(token_var)
+                self.vm_writer.write('add')
+                # rebase 'that' to point to var+index
+                self.vm_writer.write_pop('pointer', 1)
+                self.vm_writer.write_push('that', 0)
+
                 self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == ".":
+                default_call = False
                 sanity_check = True
+
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
+
                 self._write_identifier(new_father)
                 self._tokenizer.advance()
+
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
+
                 self.compile_expression_list(new_father, jack_subroutine)
                 self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == "(":
