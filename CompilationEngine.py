@@ -23,7 +23,6 @@ class CompilationEngine:
         self.xml_root = element_tree.Element("class")
         self.vm_writer = VMWriter.VMWriter(vm_file)
         self._tokenizer = tokenizer
-        self._indentation = 0
 
     @staticmethod
     def get_label():
@@ -359,7 +358,6 @@ class CompilationEngine:
             function_name = token_value
             function_class = jack_subroutine.jack_class.name
             # Used to mark whether to use the default call, a method one
-            default_call = True
             arg_count = 0
 
             sanity_check = False
@@ -377,7 +375,7 @@ class CompilationEngine:
                 self.vm_writer.write_push('that', 0)
 
                 self._write_symbol(new_father)
-            elif self._tokenizer.get_symbol() == ".":
+            elif self._tokenizer.get_symbol() == ".": #TODO: This never enters
                 sanity_check = True
 
                 self._write_symbol(new_father)
@@ -416,22 +414,22 @@ class CompilationEngine:
             elif token_var:
                 self.vm_writer.write_push_symbol(token_var)
 
-        elif self._tokenizer.get_symbol() == "(":
+        elif self._tokenizer.get_symbol() == "(": # TODO: Debug to see when you enter here
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_expression(new_father, jack_subroutine)
             self._write_symbol(new_father)
         elif self._tokenizer.get_symbol() == "~":
-            self.vm_writer.write('not')
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_term(new_father, jack_subroutine)
+            self.vm_writer.write('not')
             sanity_check = False
         elif self._tokenizer.get_symbol() == "-":
-            self.vm_writer.write('neg')
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_term(new_father, jack_subroutine)
+            self.vm_writer.write('neg')
             sanity_check = False
 
         if sanity_check:
