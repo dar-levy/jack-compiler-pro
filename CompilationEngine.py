@@ -1,4 +1,4 @@
-import VMGenerator
+from VMGenerator import VMGenerator
 import JackObjects
 import xml.etree.ElementTree as element_tree
 
@@ -18,7 +18,7 @@ class CompilationEngine:
     def __init__(self,tokenizer, xml_output_path, vm_file):
         self.xml_root = element_tree.Element("class")
         self.xml_output_path = xml_output_path
-        self.vm_writer = VMGenerator.VMGenerator(vm_file)
+        self.vm_writer = VMGenerator(vm_file)
         self._tokenizer = tokenizer
 
     @staticmethod
