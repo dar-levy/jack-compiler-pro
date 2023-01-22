@@ -1,16 +1,20 @@
-import sys
 import os
+import sys
 from os import path
 from CompilationEngine import CompilationEngine
 from JackTokenizer import JackTokenizer
+
+
 class JackCompiler:
     def __init__(self, directory_path):
         self.directory_path = directory_path
         self.input_path = path.dirname(directory_path) if path.isfile(directory_path) else directory_path
 
     def compile(self):
-        if path.isfile(self.directory_path): self._read_file()
-        else: self._read_directory()
+        if path.isfile(self.directory_path):
+            self._read_file()
+        else:
+            self._read_directory()
 
     def _read_file(self):
         if self.directory_path.endswith(".jack"):
@@ -23,6 +27,7 @@ class JackCompiler:
                 current_code.compile()
 
             vm_file.close()
+
     def _read_directory(self):
         for file_name in os.listdir(self.input_path):
             if file_name.endswith(".jack"):
@@ -35,6 +40,7 @@ class JackCompiler:
                     current_code.compile()
 
                 vm_file.close()
+
 
 # The main program:
 if __name__ == "__main__":
