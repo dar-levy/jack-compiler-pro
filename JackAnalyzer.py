@@ -19,7 +19,7 @@ class JackAnalyzer:
             output_vm_path = f"{self.directory_path.split('.')[0]}.vm"
             with open(output_vm_path, 'w') as vm_file:
                 tokenizer = JackTokenizer(input_file_path)
-                current_code = CompilationEngine(tokenizer, vm_file)
+                current_code = CompilationEngine(tokenizer, output_xml_path, vm_file)
                 current_code.compile()
 
             vm_file.close()
@@ -31,7 +31,7 @@ class JackAnalyzer:
                 output_vm_path = f"{self.input_path}/{file_name.split('.')[0]}.vm"
                 with open(output_vm_path, 'w') as vm_file:
                     tokenizer = JackTokenizer(input_file_path)
-                    current_code = CompilationEngine(tokenizer, vm_file)
+                    current_code = CompilationEngine(tokenizer, output_xml_path, vm_file)
                     current_code.compile()
 
                 vm_file.close()

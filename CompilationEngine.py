@@ -15,8 +15,9 @@ BINARY_OPS = {'+': 'add',
 label_count = 0
 
 class CompilationEngine:
-    def __init__(self,tokenizer, vm_file):
+    def __init__(self,tokenizer, xml_output_path, vm_file):
         self.xml_root = element_tree.Element("class")
+        self.xml_output_path = xml_output_path
         self.vm_writer = VMGenerator.VMGenerator(vm_file)
         self._tokenizer = tokenizer
 
@@ -31,11 +32,13 @@ class CompilationEngine:
 
     def compile(self):
         self.compile_class()
+
+    def _create_xml(self, xml_bytes):
         element_tree.indent(self.xml_root)
         xml_as_bytes = element_tree.tostring(self.xml_root, short_empty_elements=False)
-        # with open(self.output_file_path, "wb") as file:
-        #     file.write(xml_as_bytes)
-        # file.close()
+        with open(self.xml_output_path, "wb") as xml_file:
+            xml_file.write(xml_bytes)
+        xml_file.close()
 
     def compile_class(self):
         current_father = self.xml_root
