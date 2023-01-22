@@ -10,3 +10,12 @@ SYMBOL = re.compile("^\s*([{}()\[\].,;+\-*/&|<>=~])\s*")
 DIGIT = re.compile("^\s*(\d+)\s*")
 STRING = re.compile("^\s*\"(.*)\"\s*")
 IDENTIFIER = re.compile("^\s*([a-zA-Z_][a-zA-Z1-9_]*)\s*")
+BINARY_OPS = {'+': 'add',
+                     '-': 'sub',
+                     '/': 'call Math.divide 2',
+                     '*': 'call Math.multiply 2',
+                     '|': 'or',
+                     '&': 'and',
+                     '<': 'lt',
+                     '>': 'gt',
+                     '=': 'eq'}

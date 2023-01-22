@@ -1,16 +1,7 @@
 from VMGenerator import VMGenerator
-import JackObjects
 import xml.etree.ElementTree as element_tree
-
-BINARY_OPS = {'+': 'add',
-                     '-': 'sub',
-                     '/': 'call Math.divide 2',
-                     '*': 'call Math.multiply 2',
-                     '|': 'or',
-                     '&': 'and',
-                     '<': 'lt',
-                     '>': 'gt',
-                     '=': 'eq'}
+from Patterns import BINARY_OPS
+import JackObjects
 
 label_count = 0
 
@@ -24,10 +15,8 @@ class CompilationEngine:
     @staticmethod
     def get_label():
         global label_count
-
         label = 'L{}'.format(label_count)
         label_count += 1
-
         return label
 
     def compile(self):
