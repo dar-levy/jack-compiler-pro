@@ -1,7 +1,8 @@
-from VMGenerator import VMGenerator
 import xml.etree.ElementTree as element_tree
+from JackSubroutine import JackSubroutine
+from VMGenerator import VMGenerator
+from JackClass import JackClass
 from Patterns import BINARY_OPS
-import JackObjects
 
 label_count = 0
 
@@ -39,7 +40,7 @@ class CompilationEngine:
             self._tokenizer.advance()
             self._write_identifier(current_father)
             class_name = self._tokenizer.get_identifier()
-            jack_class = JackObjects.JackClass(class_name)
+            jack_class = JackClass(class_name)
 
             self._tokenizer.advance()
             self._write_symbol(current_father)
@@ -83,7 +84,7 @@ class CompilationEngine:
         self._tokenizer.advance()
 
         name = self._tokenizer.get_identifier()
-        jack_subroutine = JackObjects.JackSubroutine(
+        jack_subroutine = JackSubroutine(
             name, subroutine_type, return_type, jack_class
         )
 

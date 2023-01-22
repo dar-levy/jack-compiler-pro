@@ -21,3 +21,7 @@ BINARY_OPS = {'+': 'add',
                      '>': 'gt',
                      '=': 'eq'}
 JackSymbol = namedtuple('Symbol', ['kind', 'type', 'id'])
+TYPE_TO_SYMBOL = {'static': 'static',
+                   'field': 'this',
+                   'arg': 'argument',
+                   'var': 'local'}

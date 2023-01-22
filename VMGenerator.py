@@ -1,7 +1,4 @@
-type_to_segment = {'static': 'static',
-                   'field': 'this',
-                   'arg': 'argument',
-                   'var': 'local'}
+from Patterns import TYPE_TO_SYMBOL
 
 class VMGenerator:
 	def __init__(self, vm_file):
@@ -38,14 +35,14 @@ class VMGenerator:
 		kind = jack_symbol.kind
 		offset = jack_symbol.id
 
-		segment = type_to_segment[kind]
+		segment = TYPE_TO_SYMBOL[kind]
 		self.write_pop(segment, offset)
 
 	def write_push_symbol(self, jack_symbol):
 		kind = jack_symbol.kind
 		offset = jack_symbol.id
 
-		segment = type_to_segment[kind]
+		segment = TYPE_TO_SYMBOL[kind]
 		self.write_push(segment, offset)
 
 	def write_pop(self, segment, offset):
