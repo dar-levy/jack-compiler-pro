@@ -186,27 +186,9 @@ class CompilationEngine:
         self._write_keyword(new_father)
         self._tokenizer.advance()
 
-        ##### draw
-        # self._write_identifier(new_father)
-        # self._tokenizer.advance()
-        #
-        # if self._tokenizer.get_symbol() == ".":
-        #     self._write_symbol(new_father)
-        #     self._tokenizer.advance()
-        #     self._write_identifier(new_father)
-        #     self._tokenizer.advance()
-        #
-        # self._write_symbol(new_father)
-        # self._tokenizer.advance()
-        #
-        # self.compile_expression_list(new_father, jack_subroutine)
-        #
-        # self._write_symbol(new_father)
         self.compile_term(new_father, jack_subroutine)
-        # self._tokenizer.advance()
-        ####
 
-        self.vm_writer.write_pop('temp', 0) # Suppose to be ;
+        self.vm_writer.write_pop('temp', 0)
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
