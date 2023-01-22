@@ -152,15 +152,15 @@ class CompilationEngine:
         new_father = element_tree.SubElement(current_father, "statements")
         while self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             if self._tokenizer.get_keyword() == "let":
-                self.compile_let(new_father)
+                self.compile_let(new_father, jack_element)
             elif self._tokenizer.get_keyword() == "if":
-                self.compile_if(new_father)
+                self.compile_if(new_father, jack_element)
             elif self._tokenizer.get_keyword() == "while":
-                self.compile_while(new_father)
+                self.compile_while(new_father, jack_element)
             elif self._tokenizer.get_keyword() == "do":
-                self.compile_do(new_father)
+                self.compile_do(new_father, jack_element)
             elif self._tokenizer.get_keyword() == "return":
-                self.compile_return(new_father)
+                self.compile_return(new_father, jack_element)
 
     def compile_do(self, current_father):
         new_father = element_tree.SubElement(current_father, "doStatement")
@@ -244,7 +244,7 @@ class CompilationEngine:
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
-    def compile_if(self, current_father):
+    def compile_if(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "ifStatement")
         self._write_keyword(new_father)
 
@@ -252,7 +252,7 @@ class CompilationEngine:
         self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compile_expression(new_father)
+        self.compile_expression(new_father, jack_subroutine)
 
         self._write_symbol(new_father)
 
@@ -268,27 +268,27 @@ class CompilationEngine:
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD and \
                 self._tokenizer.get_keyword() == "else":
             self._write_keyword(new_father)
-
             self._tokenizer.advance()
+
             self._write_symbol(new_father)
-
             self._tokenizer.advance()
+
             self.compile_statements(new_father)
 
             self._write_symbol(new_father)
             self._tokenizer.advance()
 
 
-    def compile_expression(self, current_father):
+    def compile_expression(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "expression")
-        self.compile_term(new_father)
+        self.compile_term(new_father, jack_subroutine)
         while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() in OP_LIST:
             self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compile_term(new_father)
+            self.compile_term(new_father, jack_subroutine)
 
-    def compile_term(self, current_father):
+    def compile_term(self, current_father, jack_subroutine):
         sanity_check = True
         new_father = element_tree.SubElement(current_father, "term")
         if self._tokenizer.get_token_type() == self._tokenizer.DIGIT:
@@ -297,6 +297,12 @@ class CompilationEngine:
             self._write_str_const(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword(new_father)
+            if self._tokenizer.get_identifier() == 'this':
+                self.vm_writer.write_push('pointer', 0)
+            else:
+                self.vm_writer.write_int(0) # null / false
+                if self._tokenizer.get_identifier() == 'true':
+                    self.vm_writer.write('not')
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier(new_father)
 
@@ -307,7 +313,7 @@ class CompilationEngine:
                 sanity_check = True
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compile_expression(new_father)
+                self.compile_expression(new_father, jack_subroutine)
                 self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == ".":
                 sanity_check = True
@@ -317,25 +323,31 @@ class CompilationEngine:
                 self._tokenizer.advance()
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compile_expression_list(new_father)
+                self.compile_expression_list(new_father, jack_subroutine)
                 self._write_symbol(new_father)
             elif self._tokenizer.get_symbol() == "(":
                 sanity_check = True
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                self.compile_expression_list(new_father)
+                self.compile_expression_list(new_father, jack_subroutine)
                 self._write_symbol(new_father)
 
         elif self._tokenizer.get_symbol() == "(":
             self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compile_expression(new_father)
+            self.compile_expression(new_father, jack_subroutine)
             self._write_symbol(new_father)
-        elif self._tokenizer.get_symbol() == "~" or self._tokenizer.get_symbol() == \
-                "-":
+        elif self._tokenizer.get_symbol() == "~":
+            self.vm_writer.write('not')
             self._write_symbol(new_father)
             self._tokenizer.advance()
-            self.compile_term(new_father)
+            self.compile_term(new_father, jack_subroutine)
+            sanity_check = False
+        elif self._tokenizer.get_symbol() == "-":
+            self.vm_writer.write('neg')
+            self._write_symbol(new_father)
+            self._tokenizer.advance()
+            self.compile_term(new_father, jack_subroutine)
             sanity_check = False
 
         if sanity_check:
@@ -409,9 +421,11 @@ class CompilationEngine:
 
     def _write_int_const(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'integerConstant', current_father)
+        self.vm_writer.write_int(self._tokenizer.get_identifier())
 
     def _write_str_const(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'stringConstant', current_father)
+        self.vm_writer.write_string(self._tokenizer.get_identifier())
 
     def _create_element(self, element_name, element_type, current_father):
         current_xml_element = element_tree.SubElement(current_father, element_type)
