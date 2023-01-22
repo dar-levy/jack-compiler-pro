@@ -21,6 +21,8 @@ class JackAnalyzer:
                 tokenizer = JackTokenizer(input_file_path)
                 current_code = CompilationEngine(tokenizer, vm_file)
                 current_code.compile()
+
+            vm_file.close()
     def _read_directory(self):
         for file_name in os.listdir(self.input_path):
             if file_name.endswith(".jack"):
