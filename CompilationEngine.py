@@ -1,5 +1,5 @@
 import VMGenerator
-import CompilationTypes
+import JackObjects
 import xml.etree.ElementTree as element_tree
 
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
@@ -50,7 +50,7 @@ class CompilationEngine:
             self._tokenizer.advance()
             self._write_identifier(current_father)
             class_name = self._tokenizer.get_identifier()
-            jack_class = CompilationTypes.JackClass(class_name)
+            jack_class = JackObjects.JackClass(class_name)
 
             self._tokenizer.advance()
             self._write_symbol(current_father)
@@ -94,7 +94,7 @@ class CompilationEngine:
         self._tokenizer.advance()
 
         name = self._tokenizer.get_identifier()
-        jack_subroutine = CompilationTypes.JackSubroutine(
+        jack_subroutine = JackObjects.JackSubroutine(
             name, subroutine_type, return_type, jack_class
         )
 
