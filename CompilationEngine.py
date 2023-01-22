@@ -186,12 +186,27 @@ class CompilationEngine:
         self._write_keyword(new_father)
         self._tokenizer.advance()
 
-        self.compile_term(current_father, jack_subroutine)
-        self.vm_writer.write_pop('temp', 0)  # Pop to avoid filling the stack with garbage
+        self._write_identifier(new_father)
         self._tokenizer.advance()
+
+        if self._tokenizer.get_symbol() == ".":
+            self._write_symbol(new_father)
+            self._tokenizer.advance()
+            self._write_identifier(new_father)
+            self._tokenizer.advance()
 
         self._write_symbol(new_father)
         self._tokenizer.advance()
+
+        self.compile_expression_list(new_father, jack_subroutine)
+
+        self._write_symbol(new_father)
+        self._tokenizer.advance()
+
+        self.vm_writer.write_pop('temp', 0)
+        self._write_symbol(new_father)
+        self._tokenizer.advance()
+
 
     def compile_let(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "letStatement")
