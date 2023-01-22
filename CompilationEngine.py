@@ -1,3 +1,4 @@
+import VMWriter
 import CompilationTypes
 from JackTokenizer import JackTokenizer
 import xml.etree.ElementTree as element_tree
@@ -5,9 +6,10 @@ import xml.etree.ElementTree as element_tree
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 class CompilationEngine:
-    def __init__(self, input_file_path, output_path):
+    def __init__(self, input_file_path, output_path, ostream):
         self._tokenizer = JackTokenizer(input_file_path)
         self.xml_root = element_tree.Element("class")
+        self.vm_writer = VMWriter.VMWriter(ostream)
         self.output_file_path = output_path
         self._indentation = 0
 
@@ -102,7 +104,19 @@ class CompilationEngine:
         while self._tokenizer.get_keyword() == "var":
             self.compile_var_dec(new_father, jack_element)
 
-        self.compile_statements(new_father)
+        self.vm_writer.write_function(jack_element)
+
+        if jack_element.subroutine_type == 'constructor':
+            field_count = jack_element.jack_class.field_symbols
+            self.vm_writer.write_push('constant', field_count)
+            self.vm_writer.write_call('Memory', 'alloc', 1)
+            # Set 'this' in the function to allow it to return it
+            self.vm_writer.write_pop('pointer', 0)
+        elif jack_element.subroutine_type == 'method':
+            self.vm_writer.write_push('argument', 0)
+            self.vm_writer.write_pop('pointer', 0)
+
+        self.compile_statements(new_father, jack_element)
 
         self._write_symbol(new_father)
 
@@ -134,7 +148,7 @@ class CompilationEngine:
         self._tokenizer.advance()
         self._compile_type_and_varName(new_father, jack_element, current_type) # TODO: add jack_subroutine
 
-    def compile_statements(self, current_father):
+    def compile_statements(self, current_father, jack_element):
         new_father = element_tree.SubElement(current_father, "statements")
         while self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             if self._tokenizer.get_keyword() == "let":
