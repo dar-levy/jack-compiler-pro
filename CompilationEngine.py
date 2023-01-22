@@ -1,3 +1,4 @@
+import CompilationTypes
 from JackTokenizer import JackTokenizer
 import xml.etree.ElementTree as element_tree
 
@@ -27,92 +28,111 @@ class CompilationEngine:
 
             self._tokenizer.advance()
             self._write_identifier(current_father)
+            class_name = self._tokenizer.get_identifier()
+            jack_class = CompilationTypes.JackClass(class_name)
 
             self._tokenizer.advance()
             self._write_symbol(current_father)
 
             self._tokenizer.advance()
-            self._handle_var_dec(current_father)
-            self._handle_sub_routine(current_father)
+            self._handle_var_dec(current_father, jack_class)
+            self._handle_sub_routine(current_father, jack_class)
 
             self._write_symbol(current_father)
 
-    def _handle_var_dec(self, current_father):
+    def _handle_var_dec(self, current_father, jack_class):
         while self._tokenizer.get_keyword() == "field" or \
                 self._tokenizer.get_keyword() == "static":
-            self.compile_class_var_dec(current_father)
+            self.compile_class_var_dec(current_father, jack_class)
 
-    def _handle_sub_routine(self, current_father):
+    def _handle_sub_routine(self, current_father, jack_class):
         while self._tokenizer.get_keyword() == "constructor" or \
                 self._tokenizer.get_keyword() == "function" \
                 or self._tokenizer.get_keyword() == "method":
-            self.compile_subroutine(current_father)
+            self.compile_subroutine(current_father, jack_class)
 
-    def compile_class_var_dec(self, current_father):
+    def compile_class_var_dec(self, current_father, jack_class):
         new_father = element_tree.SubElement(current_father, "classVarDec")
         self._write_keyword(new_father)
-
+        current_type = self._tokenizer.get_keyword()
         self._tokenizer.advance()
-        self._compile_type_and_varName(new_father)
+        self._compile_type_and_varName(new_father, jack_class, current_type)
 
-    def compile_subroutine(self, current_father):
+    def compile_subroutine(self, current_father, jack_class):
         new_father = element_tree.SubElement(current_father, "subroutineDec")
         self._write_keyword(new_father)
-
+        subroutine_type = self._tokenizer.get_keyword()
         self._tokenizer.advance()
+
+        return_type = self._tokenizer.get_identifier()
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier(new_father)
 
         self._tokenizer.advance()
+
+        name = self._tokenizer.get_identifier()
+        jack_subroutine = CompilationTypes.JackSubroutine(
+            name, subroutine_type, return_type, jack_class
+        )
+
+
         self._write_identifier(new_father)
-
         self._tokenizer.advance()
+
+        self._write_symbol(new_father)
+        self._tokenizer.advance()
+
+        self.compile_parameter_list(new_father, jack_subroutine)
+
         self._write_symbol(new_father)
 
         self._tokenizer.advance()
-        self.compile_parameter_list(new_father)
 
-        self._write_symbol(new_father)
-
-        self._tokenizer.advance()
-
-        self.compile_subroutine_body(new_father)
+        self.compile_subroutine_body(new_father, jack_subroutine)
 
         self._tokenizer.advance()
 
-    def compile_subroutine_body(self, current_father):
+    def compile_subroutine_body(self, current_father, jack_element):
         new_father = element_tree.SubElement(current_father, "subroutineBody")
         self._write_symbol(new_father)
 
         self._tokenizer.advance()
         while self._tokenizer.get_keyword() == "var":
-            self.compile_var_dec(new_father)
+            self.compile_var_dec(new_father, jack_element)
 
         self.compile_statements(new_father)
 
         self._write_symbol(new_father)
 
-    def compile_parameter_list(self, current_father):
+    def compile_parameter_list(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "parameterList")
         while self._tokenizer.get_token_type() != self._tokenizer.SYMBOL:
             if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
                 self._write_keyword(new_father)
             elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
                 self._write_identifier(new_father)
+
+            parameter_type = self._tokenizer.get_keyword()
             self._tokenizer.advance()
+
             self._write_identifier(new_father)
+            parameter_name = self._tokenizer.get_identifier()
             self._tokenizer.advance()
+
+            jack_subroutine.add_arg(parameter_name, parameter_type)
+
             if self._tokenizer.get_symbol() == ",":
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
 
-    def compile_var_dec(self, current_father):
+    def compile_var_dec(self, current_father, jack_element):
         new_father = element_tree.SubElement(current_father, "varDec")
         self._write_keyword(new_father)
+        current_type = self._tokenizer.get_keyword()
         self._tokenizer.advance()
-        self._compile_type_and_varName(new_father)
+        self._compile_type_and_varName(new_father, jack_element, current_type) # TODO: add jack_subroutine
 
     def compile_statements(self, current_father):
         new_father = element_tree.SubElement(current_father, "statements")
@@ -325,22 +345,37 @@ class CompilationEngine:
                 self._tokenizer.advance()
                 self.compile_expression(new_father)
 
-    def _compile_type_and_varName(self, current_father):
+    def _compile_type_and_varName(self, current_father, jack_element, current_type=None):
+        var_type = self._tokenizer.get_token_type()
+
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword(current_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
             self._write_identifier(current_father)
+
         self._tokenizer.advance()
+        self._add_jack_element(jack_element, var_type, current_type)
         self._write_identifier(current_father)
+
         self._tokenizer.advance()
         while self._tokenizer.get_symbol() == ",":
             self._write_symbol(current_father)
             self._tokenizer.advance()
             self._write_identifier(current_father)
+            self._add_jack_element(jack_element, var_type, current_type)
             self._tokenizer.advance()
+
         self._write_symbol(current_father)
         self._tokenizer.advance()
 
+    def _add_jack_element(self, jack_element, var_type, current_type):
+        var_name = self._tokenizer.get_identifier()
+        if current_type == 'static':
+            jack_element.add_static(var_name, var_type)
+        elif current_type == 'field':
+            jack_element.add_field(var_name, var_type)
+        else:
+            jack_element.add_var(var_name, var_type)
     def _write_identifier(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'identifier', current_father)
 
