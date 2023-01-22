@@ -198,7 +198,8 @@ class CompilationEngine:
         self._write_keyword(new_father)
         self._tokenizer.advance()
 
-        jack_symbol = jack_subroutine.get_symbol(self._tokenizer.get_symbol())
+        var_name = self._tokenizer.get_symbol()
+        jack_symbol = jack_subroutine.get_symbol(var_name)
 
         self._write_identifier(new_father)
         self._tokenizer.advance()
@@ -459,7 +460,7 @@ class CompilationEngine:
         return count
 
     def _compile_type_and_varName(self, current_father, jack_element, current_type=None):
-        var_type = self._tokenizer.get_token_type()
+        var_type = self._tokenizer.get_identifier()
 
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD:
             self._write_keyword(current_father)
