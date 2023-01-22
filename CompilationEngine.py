@@ -6,11 +6,11 @@ import xml.etree.ElementTree as element_tree
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
 class CompilationEngine:
-    def __init__(self, input_file_path, output_path, ostream):
-        self._tokenizer = JackTokenizer(input_file_path)
+    def __init__(self,tokenizer, ostream):
+        self._tokenizer = tokenizer
         self.xml_root = element_tree.Element("class")
         self.vm_writer = VMWriter.VMWriter(ostream)
-        self.output_file_path = output_path
+        # self.output_file_path = output_path
         self._indentation = 0
 
     @staticmethod
@@ -26,9 +26,9 @@ class CompilationEngine:
         self.compile_class()
         element_tree.indent(self.xml_root)
         xml_as_bytes = element_tree.tostring(self.xml_root, short_empty_elements=False)
-        with open(self.output_file_path, "wb") as file:
-            file.write(xml_as_bytes)
-        file.close()
+        # with open(self.output_file_path, "wb") as file:
+        #     file.write(xml_as_bytes)
+        # file.close()
 
     def compile_class(self):
         current_father = self.xml_root
