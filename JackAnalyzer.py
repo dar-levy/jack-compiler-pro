@@ -27,9 +27,14 @@ class JackAnalyzer:
         for file_name in os.listdir(self.input_path):
             if file_name.endswith(".jack"):
                 input_file_path = f"{self.input_path}/{file_name.split('.')[0]}.jack"
-                output_file_path = f"{self.input_path}/{file_name.split('.')[0]}.xml"
-                current_code = CompilationEngine(input_file_path, output_file_path)
-                current_code.compile()
+                output_xml_path = f"{self.input_path}/{file_name.split('.')[0]}.xml"
+                output_vm_path = f"{self.input_path}/{file_name.split('.')[0]}.vm"
+                with open(output_vm_path, 'w') as vm_file:
+                    tokenizer = JackTokenizer(input_file_path)
+                    current_code = CompilationEngine(tokenizer, vm_file)
+                    current_code.compile()
+
+                vm_file.close()
 
 # The main program:
 if __name__ == "__main__":
