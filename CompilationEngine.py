@@ -218,23 +218,32 @@ class CompilationEngine:
 
         self._tokenizer.advance()
 
-    def compile_while(self, current_father):
+    def compile_while(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "whileStatement")
         self._write_keyword(new_father)
-
         self._tokenizer.advance()
-        self._write_symbol(new_father)
-
-        self._tokenizer.advance()
-        self.compile_expression(new_father)
 
         self._write_symbol(new_father)
-
         self._tokenizer.advance()
+
+        while_label = CompilationEngine.get_label()
+        false_label = CompilationEngine.get_label()
+
+        self.vm_writer.write_label(while_label)
+        self.compile_expression(new_father, jack_subroutine)
+
         self._write_symbol(new_father)
-
         self._tokenizer.advance()
-        self.compile_statements(new_father)
+
+        self._write_symbol(new_father)
+        self._tokenizer.advance()
+
+        self.vm_writer.write_if(false_label)
+
+        self.compile_statements(new_father, jack_subroutine)
+
+        self.vm_writer.write_goto(while_label)
+        self.vm_writer.write_label(false_label)
 
         self._write_symbol(new_father)
         self._tokenizer.advance()
