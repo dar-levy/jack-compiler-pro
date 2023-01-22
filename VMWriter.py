@@ -4,19 +4,19 @@ kind_to_segment = {'static': 'static',
                    'var': 'local'}
 
 class VMWriter:
-	def __init__(self, ostream):
-		self.ostream = ostream
+	def __init__(self, vm_file):
+		self.vm_file = vm_file
 		self.label_count = 0
 
 	def write_if(self, label):
-		self.ostream.write('not\n')
-		self.ostream.write('if-goto {}\n'.format(label))
+		self.vm_file.write('not\n')
+		self.vm_file.write('if-goto {}\n'.format(label))
 
 	def write_goto(self, label):
-		self.ostream.write('goto {}\n'.format(label))
+		self.vm_file.write('goto {}\n'.format(label))
 
 	def write_label(self, label):
-		self.ostream.write('label {}\n'.format(label))
+		self.vm_file.write('label {}\n'.format(label))
 
 	def write_function(self, jack_subroutine):
 		class_name = jack_subroutine.jack_class.name
@@ -24,13 +24,13 @@ class VMWriter:
 		local_vars = jack_subroutine.var_symbols
 		subroutine_type = jack_subroutine.subroutine_type
 
-		self.ostream.write('function {}.{} {}\n'.format(class_name, name, local_vars))
+		self.vm_file.write('function {}.{} {}\n'.format(class_name, name, local_vars))
 
 	def write_return(self):
-		self.ostream.write('return\n')
+		self.vm_file.write('return\n')
 
 	def write_call(self, class_name, func_name, arg_count):
-		self.ostream.write('call {0}.{1} {2}\n'.format(
+		self.vm_file.write('call {0}.{1} {2}\n'.format(
 				class_name, func_name, arg_count
 			))
 
@@ -49,13 +49,13 @@ class VMWriter:
 		self.write_push(segment, offset)
 
 	def write_pop(self, segment, offset):
-		self.ostream.write('pop {0} {1}\n'.format(segment, offset))
+		self.vm_file.write('pop {0} {1}\n'.format(segment, offset))
 
 	def write_push(self, segment, offset):
-		self.ostream.write('push {0} {1}\n'.format(segment, offset))
+		self.vm_file.write('push {0} {1}\n'.format(segment, offset))
 
 	def write(self, action):
-		self.ostream.write('{}\n'.format(action))
+		self.vm_file.write('{}\n'.format(action))
 
 	def write_int(self, n):
 		self.write_push('constant', n)
