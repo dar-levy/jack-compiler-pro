@@ -1,12 +1,9 @@
-from collections import namedtuple
-
-JackSymbol = namedtuple('Symbol', ['kind', 'type', 'id'])
+from Patterns import JackSymbol
 
 class JackClass:
 	def __init__(self, name):
 		self.name = name
 		self.symbols = dict()
-
 		self.static_symbols = 0
 		self.field_symbols = 0
 

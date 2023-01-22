@@ -1,4 +1,5 @@
 import re
+from collections import namedtuple
 
 COMMENT = "(//.*)|(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)"
 EMPTY_TEXT = re.compile("\s*")
@@ -19,3 +20,4 @@ BINARY_OPS = {'+': 'add',
                      '<': 'lt',
                      '>': 'gt',
                      '=': 'eq'}
+JackSymbol = namedtuple('Symbol', ['kind', 'type', 'id'])
