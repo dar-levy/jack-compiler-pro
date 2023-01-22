@@ -252,15 +252,19 @@ class CompilationEngine:
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
-    def compile_return(self, current_father):
+    def compile_return(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "returnStatement")
         self._write_keyword(new_father)
-
         self._tokenizer.advance()
+
         if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ";":
-            self.compile_expression(new_father)
+            self.compile_expression(new_father, jack_subroutine)
+        else:
+            self.vm_writer.write_int(0)
 
+        self.vm_writer.write_return()
+        
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
