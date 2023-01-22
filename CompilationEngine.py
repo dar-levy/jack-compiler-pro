@@ -1,6 +1,5 @@
-import VMWriter
+import VMGenerator
 import CompilationTypes
-from JackTokenizer import JackTokenizer
 import xml.etree.ElementTree as element_tree
 
 OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
@@ -21,7 +20,7 @@ label_count = 0
 class CompilationEngine:
     def __init__(self,tokenizer, vm_file):
         self.xml_root = element_tree.Element("class")
-        self.vm_writer = VMWriter.VMWriter(vm_file)
+        self.vm_writer = VMGenerator.VMWriter(vm_file)
         self._tokenizer = tokenizer
 
     @staticmethod

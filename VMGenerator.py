@@ -1,9 +1,9 @@
-kind_to_segment = {'static': 'static',
+type_to_segment = {'static': 'static',
                    'field': 'this',
                    'arg': 'argument',
                    'var': 'local'}
 
-class VMWriter:
+class VMGenerator:
 	def __init__(self, vm_file):
 		self.vm_file = vm_file
 		self.label_count = 0
@@ -38,14 +38,14 @@ class VMWriter:
 		kind = jack_symbol.kind
 		offset = jack_symbol.id
 
-		segment = kind_to_segment[kind]
+		segment = type_to_segment[kind]
 		self.write_pop(segment, offset)
 
 	def write_push_symbol(self, jack_symbol):
 		kind = jack_symbol.kind
 		offset = jack_symbol.id
 
-		segment = kind_to_segment[kind]
+		segment = type_to_segment[kind]
 		self.write_push(segment, offset)
 
 	def write_pop(self, segment, offset):
@@ -54,11 +54,11 @@ class VMWriter:
 	def write_push(self, segment, offset):
 		self.vm_file.write('push {0} {1}\n'.format(segment, offset))
 
-	def write(self, action):
-		self.vm_file.write('{}\n'.format(action))
+	def write(self, element):
+		self.vm_file.write('{}\n'.format(element))
 
-	def write_int(self, n):
-		self.write_push('constant', n)
+	def write_int(self, number):
+		self.write_push('constant', number)
 
 	def write_string(self, s):
 		s = s[1:-1]
