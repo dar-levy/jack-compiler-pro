@@ -186,24 +186,27 @@ class CompilationEngine:
         self._write_keyword(new_father)
         self._tokenizer.advance()
 
-        self._write_identifier(new_father)
-        self._tokenizer.advance()
+        ##### draw
+        # self._write_identifier(new_father)
+        # self._tokenizer.advance()
+        #
+        # if self._tokenizer.get_symbol() == ".":
+        #     self._write_symbol(new_father)
+        #     self._tokenizer.advance()
+        #     self._write_identifier(new_father)
+        #     self._tokenizer.advance()
+        #
+        # self._write_symbol(new_father)
+        # self._tokenizer.advance()
+        #
+        # self.compile_expression_list(new_father, jack_subroutine)
+        #
+        # self._write_symbol(new_father)
+        self.compile_term(new_father, jack_subroutine)
+        # self._tokenizer.advance()
+        ####
 
-        if self._tokenizer.get_symbol() == ".":
-            self._write_symbol(new_father)
-            self._tokenizer.advance()
-            self._write_identifier(new_father)
-            self._tokenizer.advance()
-
-        self._write_symbol(new_father)
-        self._tokenizer.advance()
-
-        self.compile_expression_list(new_father, jack_subroutine)
-
-        self._write_symbol(new_father)
-        self._tokenizer.advance()
-
-        self.vm_writer.write_pop('temp', 0)
+        self.vm_writer.write_pop('temp', 0) # Suppose to be ;
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
@@ -351,7 +354,7 @@ class CompilationEngine:
 
     def compile_term(self, current_father, jack_subroutine):
         sanity_check = True
-        new_father = element_tree.SubElement(current_father, "term")
+        new_father = element_tree.SubElement(current_father, "term") if current_father.tag != "doStatement" else current_father
         if self._tokenizer.get_token_type() == self._tokenizer.DIGIT:
             self._write_int_const(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.STRING:
@@ -390,7 +393,7 @@ class CompilationEngine:
                 self.vm_writer.write_push('that', 0)
 
                 self._write_symbol(new_father)
-            elif self._tokenizer.get_symbol() == ".": #TODO: This never enters
+            elif self._tokenizer.get_symbol() == ".":
                 sanity_check = True
 
                 self._write_symbol(new_father)
