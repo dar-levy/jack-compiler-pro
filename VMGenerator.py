@@ -5,6 +5,12 @@ class VMGenerator:
 		self.vm_file = vm_file
 		self.label_count = 0
 
+	def write_function(self, jack_subroutine):
+		class_name = jack_subroutine.jack_class.name
+		name = jack_subroutine.name
+		local_vars = jack_subroutine.var_symbols
+		self.vm_file.write(f'function {class_name}.{name} {local_vars}\n')
+
 	def write_if(self, label):
 		self.vm_file.write('not\n')
 		self.vm_file.write(f'if-goto {label}\n')
@@ -14,12 +20,6 @@ class VMGenerator:
 
 	def write_label(self, label):
 		self.vm_file.write(f'label {label}\n')
-
-	def write_function(self, jack_subroutine):
-		class_name = jack_subroutine.jack_class.name
-		name = jack_subroutine.name
-		local_vars = jack_subroutine.var_symbols
-		self.vm_file.write(f'function {class_name}.{name} {local_vars}\n')
 
 	def write_return(self):
 		self.vm_file.write('return\n')
@@ -39,15 +39,6 @@ class VMGenerator:
 		segment = TYPE_TO_SYMBOL[kind]
 		self.write_push(segment, offset)
 
-	def write_pop(self, segment, offset):
-		self.vm_file.write(f'pop {segment} {offset}\n')
-
-	def write_push(self, segment, offset):
-		self.vm_file.write(f'push {segment} {offset}\n')
-
-	def write(self, element):
-		self.vm_file.write(f'{element}\n')
-
 	def write_int(self, number):
 		self.write_push('constant', number)
 
@@ -58,3 +49,11 @@ class VMGenerator:
 		for c in s:
 			self.write_int(ord(c))
 			self.write_call('String','appendChar', 2)
+	def write_pop(self, segment, offset):
+		self.vm_file.write(f'pop {segment} {offset}\n')
+
+	def write_push(self, segment, offset):
+		self.vm_file.write(f'push {segment} {offset}\n')
+
+	def write(self, element):
+		self.vm_file.write(f'{element}\n')
