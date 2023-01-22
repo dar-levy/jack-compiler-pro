@@ -358,7 +358,6 @@ class CompilationEngine:
 
             function_name = token_value
             function_class = jack_subroutine.jack_class.name
-            # Used to mark whether to use the default call, a method one
             arg_count = 0
 
             sanity_check = False
@@ -442,20 +441,23 @@ class CompilationEngine:
         new_father = element_tree.SubElement(current_father, "expressionList")
         if self._tokenizer.get_token_type() != self._tokenizer.SYMBOL and \
                 self._tokenizer.get_symbol() != ")":
+            count += 1
             self.compile_expression(new_father, jack_subroutine)
             while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
-                count += 1
                 self.compile_expression(new_father, jack_subroutine)
+                count += 1
         if self._tokenizer.get_symbol() == "(":
             self.compile_expression(new_father, jack_subroutine)
+            count += 1
             while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
                     self._tokenizer.get_symbol() == ",":
                 self._write_symbol(new_father)
                 self._tokenizer.advance()
                 self.compile_expression(new_father, jack_subroutine)
+                count += 1
 
         return count
 
