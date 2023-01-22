@@ -13,6 +13,15 @@ class CompilationEngine:
         self.output_file_path = output_path
         self._indentation = 0
 
+    @staticmethod
+    def get_label():
+        global label_count
+
+        label = 'L{}'.format(label_count)
+        label_count += 1
+
+        return label
+
     def compile(self):
         self.compile_class()
         element_tree.indent(self.xml_root)
@@ -78,7 +87,6 @@ class CompilationEngine:
         jack_subroutine = CompilationTypes.JackSubroutine(
             name, subroutine_type, return_type, jack_class
         )
-
 
         self._write_identifier(new_father)
         self._tokenizer.advance()
@@ -254,16 +262,24 @@ class CompilationEngine:
         self.compile_expression(new_father, jack_subroutine)
 
         self._write_symbol(new_father)
-
         self._tokenizer.advance()
-        self._write_symbol(new_father)
-
-        self._tokenizer.advance()
-        self.compile_statements(new_father)
 
         self._write_symbol(new_father)
-
         self._tokenizer.advance()
+
+        false_label = CompilationEngine.get_label()
+        end_label = CompilationEngine.get_label()
+
+        self.vm_writer.write_if(false_label)
+
+        self.compile_statements(new_father, jack_subroutine)
+
+        self.vm_writer.write_goto(end_label)
+        self.vm_writer.write_label(false_label)
+
+        self._write_symbol(new_father)
+        self._tokenizer.advance()
+
         if self._tokenizer.get_token_type() == self._tokenizer.KEYWORD and \
                 self._tokenizer.get_keyword() == "else":
             self._write_keyword(new_father)
@@ -272,11 +288,12 @@ class CompilationEngine:
             self._write_symbol(new_father)
             self._tokenizer.advance()
 
-            self.compile_statements(new_father)
+            self.compile_statements(new_father, jack_subroutine)
 
             self._write_symbol(new_father)
             self._tokenizer.advance()
 
+        self.vm_writer.write_label(end_label)
 
     def compile_expression(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "expression")
