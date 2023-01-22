@@ -264,7 +264,7 @@ class CompilationEngine:
             self.vm_writer.write_int(0)
 
         self.vm_writer.write_return()
-        
+
         self._write_symbol(new_father)
         self._tokenizer.advance()
 
