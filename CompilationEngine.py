@@ -1,45 +1,35 @@
-import VMWriter
-import CompilationTypes
-from JackTokenizer import JackTokenizer
 import xml.etree.ElementTree as element_tree
-
-OP_LIST = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
-
-binary_op_actions = {'+': 'add',
-                     '-': 'sub',
-                     '*': 'call Math.multiply 2',
-                     '/': 'call Math.divide 2',
-                     '&': 'and',
-                     '|': 'or',
-                     '<': 'lt',
-                     '>': 'gt',
-                     '=': 'eq'}
-
+from JackSubroutine import JackSubroutine
+from VMGenerator import VMGenerator
+from JackClass import JackClass
+from Patterns import BINARY_OPS
 
 label_count = 0
 
+
 class CompilationEngine:
-    def __init__(self,tokenizer, vm_file):
+    def __init__(self, tokenizer, xml_output_path, vm_file):
         self.xml_root = element_tree.Element("class")
-        self.vm_writer = VMWriter.VMWriter(vm_file)
+        self.xml_output_path = xml_output_path
+        self.vm_writer = VMGenerator(vm_file)
         self._tokenizer = tokenizer
 
     @staticmethod
     def get_label():
         global label_count
-
         label = 'L{}'.format(label_count)
         label_count += 1
-
         return label
 
     def compile(self):
         self.compile_class()
+
+    def _create_xml(self, xml_bytes):
         element_tree.indent(self.xml_root)
         xml_as_bytes = element_tree.tostring(self.xml_root, short_empty_elements=False)
-        # with open(self.output_file_path, "wb") as file:
-        #     file.write(xml_as_bytes)
-        # file.close()
+        with open(self.xml_output_path, "wb") as xml_file:
+            xml_file.write(xml_bytes)
+        xml_file.close()
 
     def compile_class(self):
         current_father = self.xml_root
@@ -51,7 +41,7 @@ class CompilationEngine:
             self._tokenizer.advance()
             self._write_identifier(current_father)
             class_name = self._tokenizer.get_identifier()
-            jack_class = CompilationTypes.JackClass(class_name)
+            jack_class = JackClass(class_name)
 
             self._tokenizer.advance()
             self._write_symbol(current_father)
@@ -95,7 +85,7 @@ class CompilationEngine:
         self._tokenizer.advance()
 
         name = self._tokenizer.get_identifier()
-        jack_subroutine = CompilationTypes.JackSubroutine(
+        jack_subroutine = JackSubroutine(
             name, subroutine_type, return_type, jack_class
         )
 
@@ -165,7 +155,7 @@ class CompilationEngine:
         self._write_keyword(new_father)
         current_type = self._tokenizer.get_keyword()
         self._tokenizer.advance()
-        self._compile_type_and_varName(new_father, jack_element, current_type) # TODO: add jack_subroutine
+        self._compile_type_and_varName(new_father, jack_element, current_type)  # TODO: add jack_subroutine
 
     def compile_statements(self, current_father, jack_element):
         new_father = element_tree.SubElement(current_father, "statements")
@@ -191,7 +181,6 @@ class CompilationEngine:
         self.vm_writer.write_pop('temp', 0)
         self._write_symbol(new_father)
         self._tokenizer.advance()
-
 
     def compile_let(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "letStatement")
@@ -328,16 +317,17 @@ class CompilationEngine:
         new_father = element_tree.SubElement(current_father, "expression")
         self.compile_term(new_father, jack_subroutine)
         while self._tokenizer.get_token_type() == self._tokenizer.SYMBOL and \
-                self._tokenizer.get_symbol() in OP_LIST:
+                self._tokenizer.get_symbol() in BINARY_OPS.keys():
             binary_op = self._tokenizer.get_symbol()
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_term(new_father, jack_subroutine)
-            self.vm_writer.write(binary_op_actions[binary_op])
+            self.vm_writer.write(BINARY_OPS[binary_op])
 
     def compile_term(self, current_father, jack_subroutine):
         sanity_check = True
-        new_father = element_tree.SubElement(current_father, "term") if current_father.tag != "doStatement" else current_father
+        new_father = element_tree.SubElement(current_father,
+                                             "term") if current_father.tag != "doStatement" else current_father
         if self._tokenizer.get_token_type() == self._tokenizer.DIGIT:
             self._write_int_const(new_father)
         elif self._tokenizer.get_token_type() == self._tokenizer.STRING:
@@ -347,7 +337,7 @@ class CompilationEngine:
             if self._tokenizer.get_identifier() == 'this':
                 self.vm_writer.write_push('pointer', 0)
             else:
-                self.vm_writer.write_int(0) # null / false
+                self.vm_writer.write_int(0)  # null / false
                 if self._tokenizer.get_identifier() == 'true':
                     self.vm_writer.write('not')
         elif self._tokenizer.get_token_type() == self._tokenizer.IDENTIFIER:
@@ -414,7 +404,7 @@ class CompilationEngine:
             elif token_var:
                 self.vm_writer.write_push_symbol(token_var)
 
-        elif self._tokenizer.get_symbol() == "(": # TODO: Debug to see when you enter here
+        elif self._tokenizer.get_symbol() == "(":  # TODO: Debug to see when you enter here
             self._write_symbol(new_father)
             self._tokenizer.advance()
             self.compile_expression(new_father, jack_subroutine)
@@ -434,7 +424,6 @@ class CompilationEngine:
 
         if sanity_check:
             self._tokenizer.advance()
-
 
     def compile_expression_list(self, current_father, jack_subroutine):
         count = 0
@@ -492,6 +481,7 @@ class CompilationEngine:
             jack_element.add_field(var_name, var_type)
         else:
             jack_element.add_var(var_name, var_type)
+
     def _write_identifier(self, current_father):
         self._create_element(self._tokenizer.get_identifier(), 'identifier', current_father)
 
