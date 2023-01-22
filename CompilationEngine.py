@@ -170,26 +170,13 @@ class CompilationEngine:
             elif self._tokenizer.get_keyword() == "return":
                 self.compile_return(new_father, jack_element)
 
-    def compile_do(self, current_father):
+    def compile_do(self, current_father, jack_subroutine):
         new_father = element_tree.SubElement(current_father, "doStatement")
         self._write_keyword(new_father)
         self._tokenizer.advance()
 
-        self._write_identifier(new_father)
-        self._tokenizer.advance()
-
-        if self._tokenizer.get_symbol() == ".":
-            self._write_symbol(new_father)
-            self._tokenizer.advance()
-            self._write_identifier(new_father)
-            self._tokenizer.advance()
-
-        self._write_symbol(new_father)
-        self._tokenizer.advance()
-
-        self.compile_expression_list(new_father)
-
-        self._write_symbol(new_father)
+        self.compile_term(current_father, jack_subroutine)
+        self.vm_writer.write_pop('temp', 0)  # Pop to avoid filling the stack with garbage
         self._tokenizer.advance()
 
         self._write_symbol(new_father)
